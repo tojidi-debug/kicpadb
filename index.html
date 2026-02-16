@@ -1137,9 +1137,28 @@ const EMBEDDED_DATA = [{"회사조치": {"회사명": "㈜다보링크", "업종
       try {
         const r = null;
         D = EMBEDDED_DATA;
+        // [디버깅] 데이터 비어있음 체크
+        if (!D || D.length === 0) {
+          document.getElementById('main').innerHTML = '<div class="empty">데이터가 없습니다. (JSON 로드됨, 항목 0개)</div>';
+          return;
+        }
+
         D.forEach(d => {
-          const m = (d._source_file || '').match(/(\d{2})년\s*(\d)분기/);
-          d._yr = m ? parseInt('20' + m[1]) : 0; d._qt = m ? parseInt(m[2]) : 0; d._sort = d._yr * 10 + d._qt;
+          // [수정] _source_file 필드 부재 시 감리종결일/착수일 기반 연도/분기 추출
+          const c = d.회사조치 || {};
+          let dateStr = c.감리종결일 || c.감리착수일 || '';
+          // 날짜 형식: YYYY-MM-DD
+          let m = dateStr.match(/^(\d{4})-(\d{2})/);
+          if (m) {
+            d._yr = parseInt(m[1]);
+            d._qt = Math.ceil(parseInt(m[2]) / 3);
+          } else {
+            // 기존 _source_file 로직 (fallback)
+            m = (d._source_file || '').match(/(\d{2})년\s*(\d)분기/);
+            d._yr = m ? parseInt('20' + m[1]) : 0;
+            d._qt = m ? parseInt(m[2]) : 0;
+          }
+          d._sort = d._yr * 10 + d._qt;
         });
         document.getElementById('topInfo').innerHTML = `총 ${D.length}건 | 2026-02-16 <button onclick="location.href='https://tojidi-debug.github.io/doyaa/aihome.html'" style="margin-left:8px;padding:4px 10px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f8f9fa;font-size:14px;color:#444;font-weight:bold">Han_AI</button>`;
         buildYearF(); run();
