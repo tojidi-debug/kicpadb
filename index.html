@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>감리조치 DB 대시보드</title>
+  <title>심사조치안 DB</title>
   <style>
     * {
       margin: 0;
@@ -855,7 +855,7 @@
 
 <body>
   <div class="topbar">
-    <h1>감리조치 DB</h1>
+    <h1>심사조치 DB</h1>
     <div class="info" id="topInfo">로딩 중...</div>
   </div>
   <div class="app">
@@ -1141,7 +1141,7 @@ const EMBEDDED_DATA = [{"회사조치": {"회사명": "㈜다보링크", "업종
           const m = (d._source_file || '').match(/(\d{2})년\s*(\d)분기/);
           d._yr = m ? parseInt('20' + m[1]) : 0; d._qt = m ? parseInt(m[2]) : 0; d._sort = d._yr * 10 + d._qt;
         });
-        document.getElementById('topInfo').innerHTML = `총 ${D.length}건 | 2026-02-16 <button onclick="location.href='https://tojidi-debug.github.io/doyaa/aihome.html'" style="margin-left:8px;padding:2px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f8f9fa;font-size:11px;color:#444;font-weight:bold">Han_AI</button>`;
+        document.getElementById('topInfo').innerHTML = `총 ${D.length}건 | 2026-02-16 <button onclick="location.href='https://tojidi-debug.github.io/doyaa/aihome.html'" style="margin-left:8px;padding:4px 10px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f8f9fa;font-size:14px;color:#444;font-weight:bold">Han_AI</button>`;
         buildYearF(); run();
       } catch (e) { document.getElementById('main').innerHTML = `<div class="empty">데이터 로드 실패: ${e.message}</div>` }
     }
@@ -1224,11 +1224,13 @@ const EMBEDDED_DATA = [{"회사조치": {"회사명": "㈜다보링크", "업종
       if (url.includes('drive') && url.includes('id=')) {
         const match = url.match(/id=([^&]+)/);
         if (match && match[1]) {
-          finalUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+          // [수정] 다운로드 링크(uc?export=download) 대신 미리보기 링크(view)로 변경하여 404/리다이렉트 오류 방지
+          finalUrl = `https://drive.google.com/file/d/${match[1]}/view`;
         }
       }
+    }
 
-      return `<button class="copy-all-btn" style="background:#2563eb;color:#fff;border-color:#2563eb;margin-right:6px" onclick="event.stopPropagation(); window.open('${finalUrl}','_blank')"><svg style="width:14px;height:14px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>조치안 보기</button>`
+    return `<button class="copy-all-btn" style="background:#2563eb;color:#fff;border-color:#2563eb;margin-right:6px" onclick="event.stopPropagation(); window.open('${finalUrl}','_blank')"><svg style="width:14px;height:14px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>조치안 보기</button>`
     }
 
     function showTab(id) {
