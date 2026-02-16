@@ -1141,7 +1141,7 @@ const EMBEDDED_DATA = [{"회사조치": {"회사명": "㈜다보링크", "업종
           const m = (d._source_file || '').match(/(\d{2})년\s*(\d)분기/);
           d._yr = m ? parseInt('20' + m[1]) : 0; d._qt = m ? parseInt(m[2]) : 0; d._sort = d._yr * 10 + d._qt;
         });
-        document.getElementById('topInfo').textContent = `총 ${D.length}건 | 2026-02-16`;
+        document.getElementById('topInfo').innerHTML = `총 ${D.length}건 | 2026-02-16 <button onclick="location.href='https://tojidi-debug.github.io/doyaa/aihome.html'" style="margin-left:8px;padding:2px 6px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f8f9fa;font-size:11px;color:#444;font-weight:bold">Han_AI</button>`;
         buildYearF(); run();
       } catch (e) { document.getElementById('main').innerHTML = `<div class="empty">데이터 로드 실패: ${e.message}</div>` }
     }
