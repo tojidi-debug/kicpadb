@@ -1243,8 +1243,9 @@ const EMBEDDED_DATA = [{"회사조치": {"회사명": "㈜다보링크", "업종
       if (url.includes('drive') && url.includes('id=')) {
         const match = url.match(/id=([^&]+)/);
         if (match && match[1]) {
-          // [수정] 다운로드 링크(uc?export=download) 대신 미리보기 링크(view)로 변경하여 404/리다이렉트 오류 방지
-          finalUrl = `https://drive.google.com/file/d/${match[1]}/view`;
+          // [수정] 사용자 요청: 뷰어(/view) 대신 다운로드 링크(uc?export=download) 사용
+          // 보안/세션 문제 회피를 위해 표준 구글 드라이브 다운로드 URL 포맷 사용
+          finalUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
         }
       }
 
