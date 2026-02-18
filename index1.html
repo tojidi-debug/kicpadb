@@ -150,7 +150,7 @@ const COPY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 const DOC_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 
 let D=[],F=[],sel=-1,yr='all',tp='all',sortMode='new',query='',curData=null,currentTab='co';
-function fm(v){if(v==null||v==='')return'-';if(typeof v==='number')return v.toLocaleString();return v}
+function fm(v){if(v==null||v==='')return'-';if(typeof v==='number')return v.toLocaleString();let s=String(v),m=s.match(/^([△\-]?)(\d+)(\.\d+)?$/);if(m){let n=parseInt(m[2]).toLocaleString();return m[1]+n+(m[3]||'')}return s.replace(/(\d{4,})/g,(x)=>parseInt(x).toLocaleString())}
 function fd(k,v,cls){return `<div class="fd"><span class="k">${k}</span><span class="v${cls?' '+cls:''}">${v??'-'}</span></div>`}
 function hl(t){if(!query||!t)return t||'-';const re=new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');return t.replace(re,'<mark style="background:#fef08a;padding:0 1px;border-radius:2px">$1</mark>')}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
