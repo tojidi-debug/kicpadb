@@ -8,9 +8,11 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#f4f6f9;--card:#fff;--border:#e2e6ed;--text:#1e2938;--sub:#6b7a8d;--accent:#2563eb;--accent-light:#eff4ff;--green:#059669;--green-bg:#ecfdf5;--red:#dc2626;--red-bg:#fef2f2;--orange:#d97706;--orange-bg:#fffbeb;--purple:#7c3aed;--purple-bg:#f5f3ff}
 body{font-family:-apple-system,'Segoe UI','Malgun Gothic','Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:14px}
-.topbar{background:#1e2938;color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.topbar{background:#1e2938;color:#fff;padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .topbar h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
 .topbar .info{font-size:11px;color:#94a3b8}
+.ai-btn{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.5px;transition:all .2s;box-shadow:0 2px 8px rgba(99,102,241,.4)}
+.ai-btn:hover{background:linear-gradient(135deg,#4f46e5,#7c3aed);transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.5)}
 .app{display:flex;height:calc(100vh - 50px)}
 .sidebar{width:380px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .search-area{padding:12px 14px;border-bottom:1px solid var(--border);background:#fafbfc}
@@ -113,6 +115,7 @@ body{font-family:-apple-system,'Segoe UI','Malgun Gothic','Noto Sans KR',sans-se
 <body>
 <div class="topbar">
 <h1>감리조치안 DB</h1>
+<a href="https://tojidi-debug.github.io/doyaa/aihome.html" class="ai-btn">Han_AI</a>
 <div class="info" id="topInfo">로딩 중...</div>
 </div>
 <div class="app">
@@ -163,7 +166,7 @@ function docBtns(d){
   const types={};
   docs.forEach(doc=>{if(!types[doc.type])types[doc.type]=[];types[doc.type].push(doc)});
   let h='';
-  ['감리위','위탁위','증선위','과징금','포상금','기타'].forEach(tp=>{
+  ['위탁위','감리위','증선위','과징금','포상금','기타'].forEach(tp=>{
     if(!types[tp])return;
     const items=types[tp];
     if(items.length===1){
