@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>⭐ 영어 그림 스토리북</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--g:#5C9A50;--g2:#8BC975;--gold:#FFD566;--ink:#2A1F0E;--muted:#7A6A55;--bd:#DDD0B0;--sh:rgba(60,40,10,.1);--paper:rgba(255,254,248,.96)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#e8f5e3 0%,#fff9e6 40%,#e5f4ff 75%,#fff3e8 100%);background-attachment:fixed;min-height:100vh;color:var(--ink);overflow-x:hidden}
+.hidden{display:none!important}
+/* BUTTONS */
+.btn{border:none;border-radius:50px;padding:10px 22px;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-p{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;box-shadow:0 4px 18px rgba(92,154,80,.35)}
+.btn-p:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(92,154,80,.45)}
+.btn-g{background:none;border:1.5px solid var(--bd);color:var(--muted)}
+.btn-g:hover{border-color:var(--g2);color:var(--g)}
+.btn:disabled{opacity:.35;cursor:not-allowed!important;transform:none!important;pointer-events:none}
+/* CARD */
+.card{background:var(--paper);border-radius:24px;box-shadow:0 6px 32px var(--sh),inset 0 1px 0 rgba(255,255,255,.9);border:1.5px solid var(--bd)}
+/* NAV */
+#nav{position:sticky;top:0;z-index:100;background:rgba(255,253,248,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nav-logo{font-family:'Baloo 2',cursive;font-size:21px;font-weight:800;color:var(--g);white-space:nowrap}
+.nav-steps{display:flex;gap:3px}
+.ns{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);border:1.5px solid transparent;transition:all .2s;cursor:default;white-space:nowrap}
+.ns.done{color:var(--g);border-color:var(--g2);background:rgba(139,201,117,.12)}
+.ns.active{color:#fff;background:var(--g)}
+/* SCREENS */
+.scr{display:none;animation:fadeUp .4s ease}.scr.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.inner{max-width:920px;margin:0 auto;padding:28px 16px 90px}
+/* HERO */
+.hero{text-align:center;padding:28px 0 20px}
+.hero-icon{font-size:58px;display:block;animation:fl 3s ease-in-out infinite;margin-bottom:8px}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero h1{font-family:'Baloo 2',cursive;font-size:clamp(26px,5vw,44px);font-weight:800;color:var(--g);line-height:1.1}
+.hero p{color:var(--muted);margin-top:7px;font-size:14px;line-height:1.6}
+/* INPUTS */
+.flabel{font-size:12px;font-weight:700;color:var(--g);margin-bottom:7px;display:flex;align-items:center;gap:5px;letter-spacing:.5px;text-transform:uppercase}
+.finput{width:100%;padding:13px 17px;border:2px solid var(--bd);border-radius:15px;font-family:'Noto Sans KR',sans-serif;font-size:15px;color:var(--ink);background:rgba(255,255,255,.85);transition:border-color .2s}
+.finput:focus,.ftextarea:focus{outline:none;border-color:var(--g2)}
+.ftextarea{width:100%;padding:13px 17px;border:2px solid var(--bd);border-radius:15px;font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--ink);background:rgba(255,255,255,.85);transition:border-color .2s;resize:vertical;min-height:85px;line-height:1.6}
+.ftextarea::placeholder,.finput::placeholder{color:#BBB}
+/* STYLE GRID */
+.sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+@media(min-width:560px){.sgrid{grid-template-columns:repeat(4,1fr)}}
+.scard{padding:16px 10px;border-radius:18px;text-align:center;border:2.5px solid var(--bd);cursor:pointer;background:rgba(255,255,255,.7);transition:all .25s}
+.scard:hover{border-color:var(--g2);transform:translateY(-3px);box-shadow:0 8px 24px var(--sh)}
+.scard.sel{border-color:var(--g);background:rgba(92,154,80,.08);box-shadow:0 0 0 3px rgba(92,154,80,.18)}
+.scard .si{font-size:34px;display:block;margin-bottom:7px}
+.scard .sn{font-weight:700;font-size:13px;color:var(--g)}
+.scard .sd{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+/* UPLOAD */
+.uzone{border:3px dashed var(--bd);border-radius:22px;padding:34px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,.5);transition:all .3s}
+.uzone:hover,.uzone.drag{border-color:var(--g2);background:rgba(139,201,117,.07);transform:scale(1.01)}
+.uzone .uicon{font-size:50px;display:block;margin-bottom:9px}
+.uzone h3{font-size:17px;font-weight:700;color:var(--g)}
+.uzone p{color:var(--muted);font-size:13px;margin-top:4px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:14px}
+.mthumb{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;box-shadow:0 2px 10px var(--sh)}
+.mthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.mt-lbl{position:absolute;bottom:3px;left:3px;background:rgba(92,154,80,.88);color:#fff;border-radius:7px;padding:2px 6px;font-size:10px;font-weight:700}
+.mt-rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.mthumb:hover .mt-rm{opacity:1}
+/* INFO/WARN BOXES */
+.ibox{background:rgba(255,215,102,.12);border:1.5px solid rgba(255,215,102,.4);border-radius:14px;padding:12px 16px;font-size:13px;color:#7A5A00;line-height:1.6;margin-top:12px}
+.wbox{background:rgba(255,150,50,.1);border:1.5px solid rgba(255,150,50,.35);border-radius:14px;padding:12px 16px;font-size:13px;color:#8A4A00;line-height:1.6}
+/* PAGE EDITORS */
+.ped-list{display:flex;flex-direction:column;gap:10px}
+.ped{border-radius:16px;overflow:hidden;border:1.5px solid var(--bd)}
+.ped-hd{background:linear-gradient(135deg,rgba(92,154,80,.1),rgba(139,201,117,.06));padding:11px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd);cursor:pointer}
+.ped-th{width:48px;height:48px;border-radius:9px;object-fit:cover;flex-shrink:0}
+.ped-inf h4{font-weight:700;font-size:14px;color:var(--g)}
+.ped-inf p{font-size:11px;color:var(--muted);margin-top:1px}
+.ped-tog{font-size:16px;color:var(--muted);transition:transform .3s;margin-left:auto;flex-shrink:0}
+.ped-tog.open{transform:rotate(180deg)}
+.ped-bd{padding:13px 15px;background:rgba(255,255,255,.88);display:none}
+.ped-bd.open{display:block}
+.crow{display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,.9);border-radius:12px;padding:10px;margin-bottom:8px;border:1.5px solid var(--bd)}
+.cavatar{width:32px;height:32px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFE8C8,#FFD0A0);flex-shrink:0}
+.cform{flex:1;display:flex;flex-direction:column;gap:6px}
+.cin{padding:7px 10px;border:1.5px solid var(--bd);border-radius:9px;font-family:'Noto Sans KR',sans-serif;font-size:13px;background:rgba(255,255,255,.8);color:var(--ink);width:100%}
+.cin:focus{outline:none;border-color:var(--g2)}
+.cin::placeholder{color:#BBB}
+.dlines{display:flex;flex-direction:column;gap:4px}
+.dline{display:flex;gap:6px;align-items:center}
+.rml{background:none;border:1px solid #DDD;border-radius:7px;width:22px;height:22px;cursor:pointer;color:#BBB;font-size:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.rml:hover{background:#FFE8E8;border-color:#F8AAAA;color:#C05050}
+.addl{background:none;border:1.5px dashed var(--g2);border-radius:8px;padding:5px 12px;color:var(--g);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;width:100%;margin-top:2px}
+.addl:hover{background:rgba(139,201,117,.1)}
+.rmc{background:none;border:none;color:#CCC;cursor:pointer;font-size:15px;padding:3px;flex-shrink:0}
+.rmc:hover{color:#C05050}
+.addc{width:100%;padding:8px;border:2px dashed var(--g2);border-radius:11px;background:none;color:var(--g);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;font-weight:500}
+.addc:hover{background:rgba(92,154,80,.07)}
+/* GENERATION */
+.gpanel{border-radius:22px;padding:22px;text-align:center;background:rgba(255,255,255,.88);border:1.5px solid var(--bd)}
+.gbig{font-size:18px;padding:16px 36px;border-radius:20px;font-weight:700;background:linear-gradient(135deg,#5C9A50,#8BC975);color:#fff;border:none;cursor:pointer;box-shadow:0 8px 32px rgba(92,154,80,.4);transition:all .3s;font-family:'Noto Sans KR',sans-serif}
+.gbig:hover:not(:disabled){transform:translateY(-4px);box-shadow:0 14px 40px rgba(92,154,80,.5)}
+.gbig:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.plist{text-align:left;margin-top:14px;display:flex;flex-direction:column;gap:7px}
+.pit{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--bd);background:rgba(255,255,255,.7);transition:all .3s}
+.pit.run{border-color:var(--g2);background:rgba(139,201,117,.07)}
+.pit.done{border-color:var(--g);background:rgba(92,154,80,.05)}
+.pit.err{border-color:#F8AAAA;background:#FFF0F0}
+.pit.info{border-color:rgba(90,144,200,.4);background:rgba(90,144,200,.05)}
+.pit.rate{border-color:rgba(255,180,50,.5);background:rgba(255,215,102,.07)}
+.picon{font-size:18px;flex-shrink:0;margin-top:1px}
+.ptxt{flex:1;font-size:13px;line-height:1.4}
+.pbadge{font-size:11px;padding:2px 9px;border-radius:9px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.pbadge.wait{background:#EEE;color:#999}
+.pbadge.run{background:var(--gold);color:#7A5A00}
+.pbadge.done{background:rgba(92,154,80,.2);color:var(--g)}
+.pbadge.err{background:#FFE0E0;color:#C04040}
+.pbadge.rate{background:rgba(255,180,50,.25);color:#8A4A00}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ebox{background:#FFF0F0;border:1.5px solid #F8AAAA;border-radius:12px;padding:12px 14px;color:#C04040;font-size:13px;margin-top:10px;line-height:1.5;text-align:left}
+/* READER */
+#rdr{background:linear-gradient(160deg,#131D14 0%,#0E1520 100%);min-height:100vh}
+.rnav{position:sticky;top:0;z-index:50;background:rgba(8,12,8,.92);backdrop-filter:blur(10px);padding:0 14px;height:50px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.rnav-t{font-family:'Baloo 2',cursive;font-size:17px;font-weight:700;color:var(--gold);flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbtn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.8);border-radius:16px;padding:5px 12px;font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.rbtn:hover{background:rgba(255,255,255,.2)}
+/* TTS BAR */
+.tbar{background:rgba(0,0,0,.72);backdrop-filter:blur(8px);padding:8px 14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.07)}
+.twave{display:flex;gap:2px;align-items:center;height:17px}
+.twave span{width:3px;border-radius:3px;background:var(--g2);animation:wv .8s ease-in-out infinite}
+.twave span:nth-child(2){animation-delay:.15s}.twave span:nth-child(3){animation-delay:.3s}.twave span:nth-child(4){animation-delay:.15s}
+@keyframes wv{0%,100%{height:3px}50%{height:15px}}
+.tctrls{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.tbtn{border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:5px 13px;background:rgba(255,255,255,.09);color:rgba(255,255,255,.82);font-family:'Noto Sans KR',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.tbtn:hover{background:rgba(255,255,255,.18)}
+.tbtn.on{background:var(--g);border-color:var(--g);color:#fff}
+.tbtn.story{background:linear-gradient(135deg,#5A90C8,#7AB0E8);border:none;color:#fff;box-shadow:0 2px 10px rgba(90,144,200,.35);font-size:13px;padding:7px 16px}
+.tbtn.page{background:linear-gradient(135deg,#5C9A50,#8BC975);border:none;color:#fff;box-shadow:0 2px 10px rgba(92,154,80,.35);font-size:13px;padding:7px 16px}
+.trate{display:flex;align-items:center;gap:5px;margin-left:auto}
+.trate label{font-size:11px;color:rgba(255,255,255,.42)}
+.trate input{width:70px;accent-color:var(--g2)}
+.trate span{font-size:11px;color:var(--g2);font-weight:700;min-width:28px}
+/* BOOK SPREAD */
+.bwrap{max-width:1100px;margin:0 auto;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:13px}
+.sbox{width:100%;position:relative;border-radius:4px 22px 22px 4px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.65),-8px 0 0 #3A2A0C,-14px 4px 22px rgba(0,0,0,.45)}
+.sbox canvas{width:100%;display:block;border-radius:4px 22px 22px 4px}
+.sload{aspect-ratio:2/1;background:linear-gradient(135deg,#1A2A1A,#101820);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:rgba(255,255,255,.5);border-radius:4px 22px 22px 4px}
+.sload .li{font-size:42px;animation:fl 2s ease-in-out infinite}
+.sload p{font-size:13px}
+/* PAGE NAV */
+.pnav{display:flex;align-items:center;justify-content:center;gap:14px}
+.pnbtn{background:rgba(255,255,255,.11);border:1.5px solid rgba(255,255,255,.18);color:rgba(255,255,255,.8);border-radius:50px;padding:8px 20px;font-family:'Noto Sans KR',sans-serif;font-size:14px;cursor:pointer;transition:all .2s}
+.pnbtn:hover:not(:disabled){background:rgba(255,255,255,.2);color:#fff}
+.pnbtn:disabled{opacity:.2;cursor:not-allowed}
+.pind{color:rgba(255,255,255,.55);font-size:13px;text-align:center;min-width:80px}
+.pdots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;padding:2px 0}
+.pdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s}
+.pdot.active{background:var(--g2);transform:scale(1.5)}
+.pdot.ready{background:rgba(139,201,117,.55)}
+.pdot:hover{background:rgba(255,255,255,.45)}
+/* NARRATION BOX */
+.nbox{width:100%;max-width:1100px;background:rgba(0,0,0,.52);backdrop-filter:blur(8px);border-radius:16px;padding:14px 18px;border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .25s;user-select:none}
+.nbox:hover{background:rgba(0,0,0,.68);border-color:rgba(139,201,117,.4)}
+.nbox.sp{border-color:var(--g2);background:rgba(92,154,80,.18);box-shadow:0 0 0 2px rgba(139,201,117,.3)}
+.nbox-label{font-size:10px;color:rgba(255,255,255,.38);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.nbox-text{font-family:'Patrick Hand',cursive;font-size:clamp(14px,2vw,17px);color:rgba(255,245,220,.92);line-height:1.8;font-style:italic}
+/* DIALOGUE PANEL */
+.dpanel{width:100%;max-width:1100px;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);border-radius:16px;padding:13px;border:1px solid rgba(255,255,255,.08)}
+.dp-hd{font-size:10px;color:rgba(255,255,255,.38);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.dp-lines{display:flex;flex-direction:column;gap:7px}
+.dp-line{display:flex;gap:8px;align-items:flex-start}
+.dp-line.r{flex-direction:row-reverse}
+.dp-av{font-size:18px;flex-shrink:0;margin-top:2px}
+.dp-bub{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.15);border-radius:14px;padding:8px 13px;max-width:78%;cursor:pointer;transition:all .2s;position:relative}
+.dp-bub:hover{background:rgba(255,255,255,.18);transform:scale(1.02)}
+.dp-bub.sp{background:rgba(139,201,117,.22);border-color:var(--g2);box-shadow:0 0 0 2px rgba(139,201,117,.3)}
+.dp-bub strong{font-size:10px;color:rgba(255,255,255,.42);display:block;margin-bottom:1px;letter-spacing:1px;text-transform:uppercase}
+.dp-bub span{font-family:'Patrick Hand',cursive;font-size:14px;color:rgba(255,255,255,.9);line-height:1.5}
+.dp-bub .spk-hint{position:absolute;top:4px;right:7px;font-size:10px;opacity:0;transition:opacity .2s}
+.dp-bub:hover .spk-hint{opacity:.6}
+.dp-cap{margin-top:8px;padding:8px 13px;border-radius:10px;background:rgba(255,215,102,.08);border:1px solid rgba(255,215,102,.22);color:rgba(255,215,102,.8);font-size:12px;font-style:italic;line-height:1.6}
+/* HINT IMAGE PASTE AREA */
+.hint-wrap{position:relative}
+.hint-paste-zone{border:2px dashed var(--bd);border-radius:15px;background:rgba(255,255,255,.85);transition:border-color .3s;overflow:hidden}
+.hint-paste-zone:focus-within{border-color:var(--g2)}
+.hint-paste-zone.drag-over{border-color:var(--g);background:rgba(139,201,117,.07)}
+.hint-ta{width:100%;padding:13px 17px;border:none;background:transparent;font-family:'Noto Sans KR',sans-serif;font-size:14px;color:var(--ink);resize:vertical;min-height:85px;line-height:1.6;outline:none}
+.hint-ta::placeholder{color:#BBB}
+.hint-imgs{display:flex;flex-wrap:wrap;gap:8px;padding:0 13px 13px;margin-top:0}
+.hint-img-wrap{position:relative;width:80px;height:80px;border-radius:10px;overflow:hidden;border:2px solid var(--bd);flex-shrink:0;cursor:default}
+.hint-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.hint-img-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hint-img-del:hover{background:rgba(200,50,50,.8)}
+.hint-paste-tip{font-size:11px;color:var(--muted);padding:4px 13px 10px;display:flex;align-items:center;gap:5px}
+/* HINT COUNT BADGE */
+.hint-count{background:var(--g);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px}
+@media(max-width:500px){.nav-steps{display:none}.sgrid{grid-template-columns:repeat(2,1fr)}}
+/* DOWNLOAD BAR */
+.dbar{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);padding:8px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)}
+.dbtn{border:none;border-radius:14px;padding:7px 16px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.dbtn-pdf{background:linear-gradient(135deg,#C0392B,#E74C3C);color:#fff;box-shadow:0 2px 10px rgba(192,57,43,.35)}
+.dbtn-pdf:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px rgba(192,57,43,.5)}
+.dbtn-jpg{background:linear-gradient(135deg,#E8A050,#F0C060);color:#3A2000;box-shadow:0 2px 10px rgba(232,160,80,.35)}
+.dbtn-jpg:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 18px rgba(232,160,80,.5)}
+.dbtn:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
+.dbar-info{font-size:11px;color:rgba(255,255,255,.38);margin-left:auto}
+/* DOWNLOAD PROGRESS MODAL */
+.dmodal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.dmodal{background:#1A2A1A;border:1.5px solid rgba(139,201,117,.3);border-radius:22px;padding:28px 32px;min-width:300px;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.dmodal h3{font-family:'Baloo 2',cursive;color:var(--g2);font-size:20px;margin-bottom:8px}
+.dmodal p{color:rgba(255,255,255,.6);font-size:13px;margin-bottom:18px;line-height:1.5}
+.dprogbar-wrap{background:rgba(255,255,255,.1);border-radius:10px;height:10px;overflow:hidden;margin-bottom:10px}
+.dprogbar{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--g),var(--g2));transition:width .4s ease;width:0%}
+.dstatus{font-size:13px;color:rgba(255,255,255,.55);min-height:20px}
+.dmodal-close{margin-top:16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);border-radius:12px;padding:7px 22px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;transition:all .2s}
+.dmodal-close:hover{background:rgba(255,255,255,.2)}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav id="nav">
+  <div class="nav-logo"><span style="font-size:22px;margin-right:6px;vertical-align:middle">⭐</span>영어 그림 스토리북</div>
+  <div class="nav-steps" id="navSteps">
+    <div class="ns active" data-n="1">① 설정</div>
+    <div class="ns" data-n="2">② 사진</div>
+    <div class="ns" data-n="3">③ 대화(선택)</div>
+    <div class="ns" data-n="4">④ 생성</div>
+  </div>
+  <button class="btn btn-g" id="newBtn" style="font-size:12px;padding:5px 12px">+ 새 책</button>
+</nav>
+
+<!-- ═══ SCREEN 1: SETUP ═══ -->
+<div class="scr on" id="s1"><div class="inner">
+  <div class="hero">
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px">
+      <span style="font-size:52px;filter:drop-shadow(0 4px 12px rgba(255,215,50,.45));animation:fl 3s ease-in-out infinite">⭐</span>
+      <h1 style="margin:0">영어 그림 스토리북</h1>
+    </div>
+    <p>사진 몇 장만 올리면 AI가 아름다운 10페이지 완성형 영어 스토리북을 만들어드려요<br/>
+    <small style="color:var(--g)">대화 입력은 선택사항 — AI가 모든 걸 자동으로 만들어드려요!</small></p>
+  </div>
+  <div class="card" style="padding:24px;margin-bottom:16px">
+    <!-- API KEY -->
+    <div style="margin-bottom:20px">
+      <div class="flabel">🔑 Google Gemini API Key</div>
+      <div style="display:flex;gap:8px">
+        <input class="finput" type="password" id="apiKey" placeholder="AIzaSy... (Google AI Studio에서 무료 발급)"/>
+        <button class="btn btn-g" id="keyToggle" style="padding:0 14px;border-radius:13px;flex-shrink:0">👁</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">
+        🔗 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--g)">aistudio.google.com</a> → "Get API key" → 무료 발급 · 이 브라우저에서만 사용되며 저장되지 않아요
+      </div>
+      <div class="wbox" style="margin-top:8px;font-size:12px">
+        ⚠️ <b>무료 API 제한:</b> 분당 15회. 자동 재시도하지만 오래 걸릴 수 있어요.
+        빠르게 사용하려면 <a href="https://ai.google.dev/pricing" target="_blank" style="color:var(--g)">유료 플랜</a>을 이용하세요.
+      </div>
+    </div>
+    <!-- TITLE -->
+    <div style="margin-bottom:20px">
+      <div class="flabel">📚 스토리북 제목</div>
+      <input class="finput" id="bookTitle" placeholder="예: 아이의 신나는 빙어낚시 모험" maxlength="60"/>
+    </div>
+    <!-- HINT -->
+    <div style="margin-bottom:20px">
+      <div class="flabel">💡 스토리 힌트 <span style="text-transform:none;font-weight:400;letter-spacing:0;color:var(--muted)">(선택)</span><span class="hint-count hidden" id="hintImgCount">0장</span></div>
+      <div class="hint-wrap">
+        <div class="hint-paste-zone" id="hintZone">
+          <textarea class="hint-ta" id="storyHint" placeholder="예: 2024년 1월, 강원도 인제 빙어낚시 축제. 아이(5살)가 처음 낚시를 경험했어요. 잡은 빙어는 다시 강에 놓아줬어요.&#10;&#10;💡 스크린샷·참고 이미지도 여기에 Ctrl+V로 바로 붙여넣을 수 있어요!"></textarea>
+          <div class="hint-imgs" id="hintImgs"></div>
+          <div class="hint-paste-tip">📋 스크린샷·카카오톡 사진·메모 이미지를 <b>Ctrl+V</b> (Mac: Cmd+V) 로 바로 붙여넣기 가능해요</div>
+        </div>
+      </div>
+    </div>
+    <!-- STYLE -->
+    <div>
+      <div class="flabel">🎨 그림 스타일</div>
+      <div class="sgrid">
+        <div class="scard sel" data-st="pastel"><span class="si">🌸</span><span class="sn">파스텔 따스한</span><span class="sd">수채화·황금빛 동화</span></div>
+        <div class="scard" data-st="realistic"><span class="si">📷</span><span class="sn">사실적 보정</span><span class="sd">감성 사진 필터</span></div>
+        <div class="scard" data-st="cartoon"><span class="si">🎨</span><span class="sn">귀여운 일러스트</span><span class="sd">밝은 컬러 만화</span></div>
+        <div class="scard" data-st="fantasy"><span class="si">🌌</span><span class="sn">상상속 세상</span><span class="sd">지브리·마법 판타지</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-p" id="s1next" disabled style="font-size:15px;padding:12px 30px">다음 → 사진 업로드</button>
+  </div>
+</div></div>
+
+<!-- ═══ SCREEN 2: MEDIA ═══ -->
+<div class="scr" id="s2"><div class="inner">
+  <h2 style="font-family:'Baloo 2',cursive;font-size:24px;color:var(--g);margin-bottom:5px">📸 사진 & 영상 업로드</h2>
+  <p style="color:var(--muted);margin-bottom:14px;font-size:14px">
+    <b style="color:var(--g)">최대 10개</b>까지 올릴 수 있어요. AI가 이야기 흐름에 맞게 자동으로 순서를 재배열해서 <b style="color:var(--g)">10~12페이지 스토리</b>를 완성해요.
+  </p>
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div class="uzone" id="uzone">
+      <span class="uicon">🌿</span>
+      <h3>드래그하거나 클릭해서 사진 선택</h3>
+      <p>JPG · PNG · WEBP · MP4 지원 · 최대 10개</p>
+      <input type="file" id="mInput" accept="image/*,video/*" multiple style="display:none"/>
+    </div>
+    <div class="mgrid" id="mgrid"></div>
+  </div>
+  <div class="ibox">
+    📌 사진 순서는 그냥 올려도 괜찮아요! AI가 <b>시작→전개→절정→결말→교훈</b> 흐름에 맞게 자동 재배열해요.<br/>
+    🎯 날짜·장소·인물 정보가 있는 사진일수록 더 풍부한 스토리가 만들어져요.
+  </div>
+  <div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px">
+    <button class="btn btn-g" id="s2back">← 이전</button>
+    <button class="btn btn-p" id="s2next" disabled style="font-size:15px;padding:12px 28px">다음 → 대화 입력 (선택)</button>
+  </div>
+</div></div>
+
+<!-- ═══ SCREEN 3: DIALOGUE (OPTIONAL) ═══ -->
+<div class="scr" id="s3"><div class="inner">
+  <h2 style="font-family:'Baloo 2',cursive;font-size:24px;color:var(--g);margin-bottom:5px">💬 대화 입력 <span style="font-size:16px;color:var(--muted);font-weight:400">(선택사항)</span></h2>
+  <p style="color:var(--muted);margin-bottom:8px;font-size:14px">
+    아래를 채우지 않아도 돼요 — AI가 사진을 보고 모든 대화와 내레이션을 자동으로 만들어드려요!<br/>
+    <b style="color:var(--g)">한글·영어 모두 OK</b> — AI가 자연스러운 영어로 변환해요.
+  </p>
+  <div class="ped-list" id="pedList"></div>
+  <div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px">
+    <button class="btn btn-g" id="s3back">← 이전</button>
+    <button class="btn btn-p" id="s3next" style="font-size:15px;padding:12px 28px">AI 생성 시작 🪄</button>
+  </div>
+</div></div>
+
+<!-- ═══ SCREEN 4: GENERATE ═══ -->
+<div class="scr" id="s4"><div class="inner">
+  <h2 style="font-family:'Baloo 2',cursive;font-size:24px;color:var(--g);margin-bottom:5px">🪄 스토리북 AI 생성</h2>
+  <p style="color:var(--muted);margin-bottom:14px;font-size:14px">Gemini가 스토리를 구성하고, 순서를 재배열하고, 각 장면을 그림으로 만들어드려요.</p>
+  <div class="gpanel">
+    <div style="font-size:42px;margin-bottom:10px">🎨</div>
+    <button class="gbig" id="genBtn">✨ 스토리북 생성 시작!</button>
+    <div id="genErr" class="ebox hidden"></div>
+    <div class="plist" id="plist"></div>
+  </div>
+  <div style="margin-top:12px"><button class="btn btn-g" id="s4back">← 이전</button></div>
+</div></div>
+
+<!-- ═══ SCREEN 5: READER ═══ -->
+<div class="scr" id="rdr">
+  <div class="rnav">
+    <button class="rbtn" id="exitBtn">← 나가기</button>
+    <div class="rnav-t" id="rTitle">영어 그림 스토리북</div>
+    <button class="rbtn" id="regenBtn">🔄 다시 만들기</button>
+  </div>
+  <!-- DOWNLOAD BAR -->
+  <div class="dbar" id="dbar">
+    <span style="font-size:12px;color:rgba(255,255,255,.5);white-space:nowrap">💾 저장</span>
+    <button class="dbtn dbtn-pdf" id="dlPdf" disabled>📄 PDF 전체 저장</button>
+    <button class="dbtn dbtn-jpg" id="dlJpg" disabled>🖼 JPG 전체 저장 (ZIP)</button>
+    <button class="dbtn" id="dlThis" disabled style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2)">📥 현재 페이지 JPG</button>
+    <div class="dbar-info" id="dbarInfo">생성 완료 후 활성화</div>
+  </div>
+  <!-- DOWNLOAD PROGRESS MODAL -->
+  <div class="dmodal-bg hidden" id="dmodalBg">
+    <div class="dmodal">
+      <h3 id="dmodalTitle">📥 다운로드 중...</h3>
+      <p id="dmodalDesc">잠시만 기다려주세요</p>
+      <div class="dprogbar-wrap"><div class="dprogbar" id="dprogbar"></div></div>
+      <div class="dstatus" id="dstatus"></div>
+      <button class="dmodal-close hidden" id="dmodalClose">✓ 닫기</button>
+    </div>
+  </div>
+  <!-- TTS BAR -->
+  <div class="tbar">
+    <div class="twave" id="twave" style="display:none"><span></span><span></span><span></span><span></span></div>
+    <div class="tctrls">
+      <button class="tbtn story" id="tStory">📖 Read Story</button>
+      <button class="tbtn page" id="tPage">▶ 이 페이지</button>
+      <button class="tbtn" id="tPause" style="display:none">⏸</button>
+      <button class="tbtn" id="tResume" style="display:none">▶ 계속</button>
+      <button class="tbtn" id="tStop" style="display:none">■ 정지</button>
+      <button class="tbtn" id="tAuto">🔁 자동넘기기</button>
+    </div>
+    <div class="trate">
+      <label>속도</label>
+      <input type="range" id="tRateSlider" min="0.5" max="1.3" step="0.05" value="0.85"/>
+      <span id="tRateLbl">0.85×</span>
+    </div>
+  </div>
+  <!-- BOOK -->
+  <div class="bwrap">
+    <div class="sbox" id="sbox">
+      <div class="sload" id="sload"><span class="li">🌟</span><p id="sloadTxt">페이지 로딩중...</p></div>
+      <canvas id="sCanvas" class="hidden"></canvas>
+    </div>
+    <div class="pnav">
+      <button class="pnbtn" id="prevBtn">← 이전</button>
+      <div class="pind" id="pind">— / —</div>
+      <button class="pnbtn" id="nextBtn">다음 →</button>
+    </div>
+    <div class="pdots" id="pdots"></div>
+    <!-- NARRATION -->
+    <div class="nbox" id="nbox">
+      <div class="nbox-label"><span>📖 NARRATION</span><span style="font-size:11px;color:rgba(255,255,255,.28)">(클릭 → 읽기)</span></div>
+      <div class="nbox-text" id="narrText">...</div>
+    </div>
+    <!-- DIALOGUE -->
+    <div class="dpanel">
+      <div class="dp-hd">💬 대화 <span style="font-size:10px;color:rgba(255,255,255,.28)">(말풍선 클릭 → 음성 재생)</span></div>
+      <div class="dp-lines" id="dpLines"></div>
+      <div class="dp-cap hidden" id="dpCap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+const S = {
+  key:'', title:'', hint:'', style:'pastel',
+  hintImages:[],  // {b64, mime, thumb} — pasted reference images
+  media:[],   // {id,file,url,thumb,b64,mime,isVid}
+  pages:[],   // per-photo dialogue input
+  story:null, // full story from AI
+  results:[],
+  cur:0,
+  ttsReadAll:false, ttsAuto:false, ttsOn:false, ttsPaused:false, ttsRate:0.85
+};
+
+/* ═══════════════════════════════════════════════════
+   STYLE PROMPTS
+═══════════════════════════════════════════════════ */
+const STYLES = {
+  pastel:'Transform into a warm watercolor children\'s picture book double-page spread. Soft pastel watercolor, golden warm light, nostalgic cozy storybook. Full wide landscape. No text, no words, no watermarks, no logos anywhere in the image.',
+  realistic:'Transform into a cinematic photo-illustration double-page spread. Warm golden-hour filter, soft bokeh, professional photo-book quality. Full wide landscape. No text, no words, no watermarks, no logos in the image.',
+  cartoon:'Transform into a vibrant cute cartoon double-page spread. Bright colorful flat illustration, adorable rounded characters, bold outlines, Korean picture book style. Full wide landscape. No text, no words, no watermarks, no logos.',
+  fantasy:'Transform into a Studio Ghibli-style magical fantasy double-page spread. Enchanted dreamlike world, glowing particles, magical backgrounds, soft anime. Full wide landscape. No text, no words, no watermarks, no logos.'
+};
+
+const BCOLORS=['#5C9A50','#E88CBD','#5A90C8','#E8A050','#9050C8','#C85050','#50A8C8','#C8A050'];
+const EMOJIS=['👦','👧','👩','👨','👴','👵','🧒','🐶','🐱','🦊'];
+const GM='https://generativelanguage.googleapis.com/v1beta/models';
+
+/* ═══════════════════════════════════════════════════
+   API HELPERS — with retry & rate limit handling
+═══════════════════════════════════════════════════ */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+async function withRetry(fn, retries=4) {
+  for(let i=0; i<retries; i++) {
+    try { return await fn(); }
+    catch(e) {
+      const isQuota = /quota|429|rate.?limit|limit.*0|resource.?exhaust/i.test(e.message||'');
+      if(isQuota && i<retries-1) {
+        const wait = (i+1)*25;
+        logPit(`⏳ API 한도 초과 → ${wait}초 후 재시도 (${i+1}/${retries-1})`, 'rate');
+        await sleep(wait*1000);
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
+async function callText(prompt, b64, mime, extraImages=[]) {
+  return withRetry(async ()=>{
+    const parts=[];
+    if(b64) parts.push({inline_data:{mime_type:mime,data:b64}});
+    // Include reference hint images
+    extraImages.forEach(img=>parts.push({inline_data:{mime_type:img.mime,data:img.b64}}));
+    parts.push({text:prompt});
+    const r=await fetch(`${GM}/gemini-2.0-flash:generateContent?key=${S.key}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:0.85,maxOutputTokens:3500}})
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${r.status}`);}
+    const d=await r.json();
+    return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  });
+}
+
+async function callImage(b64, mime, prompt) {
+  return withRetry(async ()=>{
+    const r=await fetch(`${GM}/gemini-2.0-flash-exp-image-generation:generateContent?key=${S.key}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[
+          {inline_data:{mime_type:mime,data:b64}},
+          {text: prompt+'\n\nGenerate a beautiful wide landscape illustration. IMPORTANT: No text, no words, no letters, no watermarks, no logos, no captions, no labels anywhere in the image. Pure illustration only.'}
+        ]}],
+        generationConfig:{responseModalities:['IMAGE','TEXT']}
+      })
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`ImgHTTP ${r.status}`);}
+    const d=await r.json();
+    for(const p of(d.candidates?.[0]?.content?.parts||[]))
+      if(p.inline_data?.mime_type?.startsWith('image/'))
+        return {b64:p.inline_data.data,mime:p.inline_data.mime_type};
+    throw new Error('이미지 생성 결과 없음 (gemini-2.0-flash-exp-image-generation 플랜 확인)');
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   MASTER STORY PROMPT
+═══════════════════════════════════════════════════ */
+function buildMasterPrompt(numPhotos, hint, title, dialogueMap, numHintImgs) {
+  const dlgHint = Object.entries(dialogueMap)
+    .filter(([_,v])=>v.trim())
+    .map(([k,v])=>`Photo ${k}: "${v}"`)
+    .join('\n') || '(no dialogue hints provided)';
+  const hintImgNote = numHintImgs > 0
+    ? `\nREFERENCE IMAGES PROVIDED: ${numHintImgs} reference image(s) attached — use them to understand desired style, mood, characters, or story context.`
+    : '';
+
+  return `You are a master children's picture book author. Create a COMPLETE cohesive storybook.
+
+TITLE: "${title}"
+PHOTOS AVAILABLE: ${numPhotos} photos, indexed 0..${numPhotos-1}
+USER STORY HINT: ${hint||'(none — analyze photos and invent a beautiful story)'}${hintImgNote}
+USER DIALOGUE HINTS PER PHOTO:\n${dlgHint}
+
+YOUR TASK:
+1. RE-ORDER the photos in the BEST narrative order (start→journey→excitement→climax→resolution→homecoming→lesson)
+2. Create EXACTLY 10 pages using those photos (reuse photos if needed)
+3. Each page NARRATION must be 2-3 poetic, warm sentences. Reading ALL narrations = complete story
+4. Each page has 2-3 SHORT dialogue lines (max 8 words each, natural child English, ages 4-8)
+5. Include: wonder, joy, small challenges overcome, kindness (releasing fish back etc), love, heartwarming lesson
+6. Character names: use names from hints, or invent warm names (Child, Mom, Dad)
+7. imagePrompt: detailed visual description for illustrating this exact scene
+
+STORY ARC REQUIRED:
+- Pages 1-2: Opening — introduce characters, the WISH or idea
+- Pages 3-4: Preparation & Journey — getting ready, traveling, anticipation
+- Pages 5-6: The Experience — arrival, first attempts, excitement builds
+- Pages 7-8: The Peak — greatest joy, achievement, laughter
+- Page 9: The Giving — kindness moment, releasing/sharing, heart grows
+- Page 10: The Dream Ending — journey home, child sleeps, dream of the animals, lesson learned
+
+RESPOND WITH ONLY VALID JSON (no markdown, no backticks, no explanation):
+{
+  "theme": "one poetic sentence about this story",
+  "moral": "the heartwarming lesson",
+  "characters": ["Child","Mom","Dad"],
+  "pages": [
+    {
+      "pageNum": 1,
+      "photoIndex": 2,
+      "chapter": "Opening",
+      "narration": "Once upon a time, there was a little child with the biggest dreams...",
+      "dialogue": [
+        {"speaker":"Child","text":"I want to go fishing!","emoji":"🐟","side":"left"},
+        {"speaker":"Mom","text":"What a wonderful idea!","emoji":"🥰","side":"right"}
+      ],
+      "imagePrompt": "A cozy living room, child pointing excitedly at a fishing magazine, parents smiling",
+      "mood": "wonder"
+    }
+  ]
+}`;
+}
+
+/* ═══════════════════════════════════════════════════
+   CANVAS — Full Spread with Speech Bubbles
+═══════════════════════════════════════════════════ */
+function drawSpread(canvas, imgSrc, dlg) {
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const W=1400,H=700; canvas.width=W; canvas.height=H;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,W,H);
+      // Spine
+      const sg=ctx.createLinearGradient(W/2-22,0,W/2+22,0);
+      sg.addColorStop(0,'rgba(55,30,5,.3)'); sg.addColorStop(.45,'rgba(175,135,55,.15)');
+      sg.addColorStop(.5,'rgba(255,195,75,.07)'); sg.addColorStop(.55,'rgba(175,135,55,.15)');
+      sg.addColorStop(1,'rgba(55,30,5,.3)');
+      ctx.fillStyle=sg; ctx.fillRect(W/2-22,0,44,H);
+      // Border
+      ctx.strokeStyle='rgba(196,168,112,.5)'; ctx.lineWidth=5; ctx.strokeRect(4,4,W-8,H-8);
+      ctx.strokeStyle='rgba(220,200,140,.25)'; ctx.lineWidth=2; ctx.strokeRect(11,11,W-22,H-22);
+      // Corner ornaments
+      [[16,16],[W-16,16],[16,H-16],[W-16,H-16]].forEach(([cx,cy])=>{
+        ctx.fillStyle='rgba(196,168,112,.6)'; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+      });
+      // Speech bubbles
+      if(dlg?.length){
+        const BW=Math.min(W*.27,325);
+        const SLOTS=[{x:24,y:24},{x:W-BW-24,y:24},{x:24,y:155},{x:W-BW-24,y:155}];
+        dlg.slice(0,4).forEach((d,i)=>drawBubble(ctx,SLOTS[i%4].x,SLOTS[i%4].y,BW,d,i));
+      }
+      ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.textAlign='left';
+      resolve();
+    };
+    img.onerror=()=>{
+      const W=1400,H=700; canvas.width=W; canvas.height=H;
+      const ctx=canvas.getContext('2d');
+      const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#1A2A1A'); g.addColorStop(1,'#0E1520');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(255,255,255,.2)'; ctx.font='20px sans-serif'; ctx.textAlign='center';
+      ctx.fillText('이미지 로드 실패',W/2,H/2); ctx.textAlign='left';
+      resolve();
+    };
+    img.src=imgSrc;
+  });
+}
+
+function drawBubble(ctx,bx,by,bw,d,idx){
+  const fs=15,lh=fs+5,isLeft=bx<200;
+  ctx.font=`${fs}px Patrick Hand,cursive`;
+  const lines=wrapText(ctx,`"${d.text||''}"`,bw-26);
+  const bh=lines.length*lh+46;
+  const col=BCOLORS[idx%BCOLORS.length];
+  // Shadow + fill
+  ctx.shadowColor='rgba(0,0,0,.2)'; ctx.shadowBlur=14; ctx.shadowOffsetY=5;
+  ctx.fillStyle='rgba(255,255,255,.97)'; rrect(ctx,bx,by,bw,bh,14); ctx.fill();
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+  // Border
+  ctx.strokeStyle=col+'80'; ctx.lineWidth=2; rrect(ctx,bx,by,bw,bh,14); ctx.stroke();
+  // Tail
+  ctx.fillStyle='rgba(255,255,255,.97)'; ctx.beginPath();
+  if(isLeft){ctx.moveTo(bx+12,by+bh);ctx.lineTo(bx+5,by+bh+12);ctx.lineTo(bx+28,by+bh);}
+  else{ctx.moveTo(bx+bw-12,by+bh);ctx.lineTo(bx+bw-5,by+bh+12);ctx.lineTo(bx+bw-28,by+bh);}
+  ctx.fill();
+  // Speaker
+  ctx.font='bold 11px Noto Sans KR,sans-serif'; ctx.fillStyle=col;
+  ctx.fillText(`${d.emoji||'💬'} ${(d.speaker||'').toUpperCase()}`,bx+11,by+17);
+  // Divider
+  ctx.strokeStyle='rgba(180,160,100,.2)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(bx+7,by+23); ctx.lineTo(bx+bw-7,by+23); ctx.stroke();
+  // Text
+  ctx.font=`${fs}px Patrick Hand,cursive`; ctx.fillStyle='#2A1F0E';
+  lines.forEach((l,i)=>ctx.fillText(l,bx+11,by+36+i*lh));
+}
+
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+function wrapText(ctx,txt,mw){
+  const words=txt.split(' '),lines=[];let cur='';
+  for(const w of words){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>mw&&cur){lines.push(cur);cur=w;}else cur=t;}
+  if(cur)lines.push(cur); return lines;
+}
+
+/* ═══════════════════════════════════════════════════
+   MEDIA HELPERS
+═══════════════════════════════════════════════════ */
+function toB64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=e=>res(e.target.result.split(',')[1]);fr.onerror=rej;fr.readAsDataURL(file);});}
+function vidThumb(file){
+  return new Promise(res=>{
+    const v=document.createElement('video'); v.src=URL.createObjectURL(file); v.muted=true;
+    v.onloadeddata=()=>{v.currentTime=Math.min(1,v.duration*.2)};
+    v.onseeked=()=>{const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);const j=c.toDataURL('image/jpeg',.85);res({thumb:j,b64:j.split(',')[1],mime:'image/jpeg'});};
+    v.onerror=()=>res({thumb:'',b64:'',mime:'image/jpeg'});
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   DOM HELPERS
+═══════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+function goTo(id){
+  ['s1','s2','s3','s4','rdr'].forEach(s=>$(s)?.classList.remove('on'));
+  $(id)?.classList.add('on');
+  const n={s1:1,s2:2,s3:3,s4:4,rdr:5}[id]||1;
+  document.querySelectorAll('.ns').forEach(el=>{const en=parseInt(el.dataset.n);el.classList.remove('active','done');if(en===n)el.classList.add('active');else if(en<n)el.classList.add('done');});
+  window.scrollTo(0,0);
+}
+
+let _logEl = null;
+function logPit(txt, type='info') {
+  const el=document.createElement('div'); el.className=`pit ${type}`;
+  const icon={rate:'⏳',err:'⚠️',info:'💡',done:'✅'}[type]||'▸';
+  el.innerHTML=`<span class="picon">${icon}</span><span class="ptxt">${txt}</span><span class="pbadge ${type==='rate'?'rate':''}">${type==='rate'?'대기중':''}</span>`;
+  $('plist').appendChild(el); el.scrollIntoView({behavior:'smooth',block:'nearest'}); return el;
+}
+
+let _mainStep = null;
+function mkStep(icon,txt){
+  const el=document.createElement('div'); el.className='pit'; _mainStep=el;
+  el.innerHTML=`<span class="picon">${icon}</span><span class="ptxt">${txt}</span><span class="pbadge wait">대기</span>`;
+  $('plist').appendChild(el); return el;
+}
+function setStepStatus(el,st,tx){
+  if(!el)return;
+  el.classList.remove('run','done','err','rate');
+  if(st)el.classList.add(st);
+  const b=el.querySelector('.pbadge'); b.className='pbadge '+(st||'wait');
+  b.innerHTML={wait:'대기',run:'<span class="spin">⟳</span>',done:'✓',err:'✕',rate:'⏳'}[st]||st;
+  if(tx)el.querySelector('.ptxt').textContent=tx;
+}
+
+/* ═══════════════════════════════════════════════════
+   STEP 1 — SETUP
+═══════════════════════════════════════════════════ */
+$('keyToggle').addEventListener('click',()=>{const i=$('apiKey');i.type=i.type==='password'?'text':'password';});
+function chk1(){S.key=$('apiKey').value.trim();S.title=$('bookTitle').value.trim();$('s1next').disabled=!S.key||!S.title;}
+$('apiKey').addEventListener('input',chk1);$('bookTitle').addEventListener('input',chk1);
+document.querySelectorAll('.scard').forEach(el=>el.addEventListener('click',()=>{document.querySelectorAll('.scard').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');S.style=el.dataset.st;}));
+$('s1next').addEventListener('click',()=>{S.hint=$('storyHint').value.trim();goTo('s2');});
+$('s2back').addEventListener('click',()=>goTo('s1'));
+
+/* ═══════════════════════════════════════════════════
+   STEP 2 — MEDIA UPLOAD
+═══════════════════════════════════════════════════ */
+const uz=$('uzone'),mi=$('mInput');
+uz.addEventListener('click',()=>mi.click());
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag')});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');addFiles(e.dataTransfer.files)});
+mi.addEventListener('change',e=>addFiles(e.target.files));
+
+async function addFiles(files){
+  for(const file of files){
+    if(S.media.length>=10) break;
+    const isVid=file.type.startsWith('video/'),isImg=file.type.startsWith('image/');
+    if(!isVid&&!isImg)continue;
+    const id=Date.now()+Math.random(); let url,thumb,b64,mime;
+    if(isImg){url=URL.createObjectURL(file);thumb=url;b64=await toB64(file);mime=file.type;}
+    else{const vt=await vidThumb(file);url=URL.createObjectURL(file);thumb=vt.thumb;b64=vt.b64;mime=vt.mime;}
+    S.media.push({id,file,url,thumb,b64,mime,isVid});
+  }
+  renderMedia(); $('s2next').disabled=!S.media.length;
+}
+
+function renderMedia(){
+  const g=$('mgrid'); g.innerHTML='';
+  S.media.forEach((m,i)=>{
+    const d=document.createElement('div'); d.className='mthumb';
+    d.innerHTML=`<img src="${m.thumb}"/><div class="mt-lbl">${i+1}</div><button class="mt-rm" onclick="rmM('${m.id}');event.stopPropagation()">✕</button>`;
+    g.appendChild(d);
+  });
+}
+window.rmM=id=>{S.media=S.media.filter(m=>m.id!==id);renderMedia();$('s2next').disabled=!S.media.length;};
+
+$('s2next').addEventListener('click',()=>{buildEditors();goTo('s3')});
+$('s3back').addEventListener('click',()=>goTo('s2'));
+
+/* ═══════════════════════════════════════════════════
+   STEP 3 — DIALOGUE EDITORS (optional)
+═══════════════════════════════════════════════════ */
+function buildEditors(){
+  S.media.forEach((m,i)=>{if(!S.pages[i])S.pages[i]={mid:m.id,chars:[{name:'',emoji:'👦',lines:['']}]};});
+  S.pages=S.pages.slice(0,S.media.length);
+  const list=$('pedList'); list.innerHTML='';
+  S.media.forEach((m,i)=>{
+    const pd=S.pages[i];
+    const div=document.createElement('div'); div.className='ped card'; div.dataset.i=i;
+    div.innerHTML=`<div class="ped-hd"><img class="ped-th" src="${m.thumb}"/><div class="ped-inf"><h4>📸 사진 ${i+1}${m.isVid?' 🎬':''}</h4><p>${m.file.name} — 비워도 AI가 자동 생성해요</p></div><span class="ped-tog">▾</span></div><div class="ped-bd" id="pbd${i}"></div>`;
+    list.appendChild(div);
+    div.querySelector('.ped-hd').addEventListener('click',()=>{const b=div.querySelector('.ped-bd'),t=div.querySelector('.ped-tog');b.classList.toggle('open');t.classList.toggle('open');});
+    renderPed(i,pd);
+  });
+}
+function renderPed(i,pd){
+  const el=$(`pbd${i}`); if(!el)return;
+  el.innerHTML=pd.chars.map((c,ci)=>`
+    <div class="crow"><div class="cavatar">${c.emoji}</div><div class="cform">
+      <input class="cin" placeholder="인물 이름 (예: 아이, Mom, Dad)" value="${c.name||''}" onchange="setN(${i},${ci},this.value)"/>
+      <div class="dlines">${c.lines.map((l,li)=>`<div class="dline"><input class="cin" placeholder="대화/표현 (한글·영어 OK, 비워도 됨)" value="${l||''}" onchange="setL(${i},${ci},${li},this.value)"/><button class="rml" onclick="rmL(${i},${ci},${li})" ${c.lines.length<=1?'disabled':''}>✕</button></div>`).join('')}</div>
+      <button class="addl" onclick="addL(${i},${ci})">+ 대사 추가</button>
+    </div><button class="rmc" onclick="rmC(${i},${ci})" ${pd.chars.length<=1?'style="opacity:.2;pointer-events:none"':''}>✕</button></div>`
+  ).join('')+`<button class="addc" onclick="addC(${i})">+ 등장인물 추가</button>`;
+}
+window.setN=(i,ci,v)=>{if(S.pages[i]?.chars[ci])S.pages[i].chars[ci].name=v};
+window.setL=(i,ci,li,v)=>{if(S.pages[i]?.chars[ci])S.pages[i].chars[ci].lines[li]=v};
+window.addL=(i,ci)=>{S.pages[i].chars[ci].lines.push('');renderPed(i,S.pages[i])};
+window.rmL=(i,ci,li)=>{if(S.pages[i].chars[ci].lines.length<=1)return;S.pages[i].chars[ci].lines.splice(li,1);renderPed(i,S.pages[i])};
+window.addC=(i)=>{const p=S.pages[i];p.chars.push({name:'',emoji:EMOJIS[p.chars.length%EMOJIS.length],lines:['']});renderPed(i,p)};
+window.rmC=(i,ci)=>{const p=S.pages[i];if(p.chars.length<=1)return;p.chars.splice(ci,1);renderPed(i,p)};
+$('s3next').addEventListener('click',()=>goTo('s4'));
+$('s4back').addEventListener('click',()=>goTo('s3'));
+
+/* ═══════════════════════════════════════════════════
+   STEP 4 — GENERATION
+   Strategy: 1 master call → per-page image calls (4s delay each)
+═══════════════════════════════════════════════════ */
+$('genBtn').addEventListener('click', async()=>{
+  const btn=$('genBtn'); btn.disabled=true;
+  const errBox=$('genErr'); errBox.classList.add('hidden'); errBox.textContent='';
+  $('plist').innerHTML=''; S.results=[]; S.story=null;
+
+  // Build dialogue map (photo index → combined user dialogue hints)
+  const dlgMap={};
+  S.pages.forEach((pd,i)=>{
+    const lines=pd.chars.flatMap(c=>[c.name?c.name+':':''].concat(c.lines.filter(l=>l.trim()))).filter(Boolean).join(' | ');
+    if(lines.trim()) dlgMap[i]=lines;
+  });
+
+  try {
+    // ── STEP A: Master story generation (1 API call) ──
+    const stStep=mkStep('📖','모든 사진 분석 → 스토리 구성 → 사진 순서 재배열 중...');
+    setStepStatus(stStep,'run');
+
+    const firstPhoto=S.media[0];
+    let raw=await callText(
+      buildMasterPrompt(S.media.length,S.hint,S.title,dlgMap,S.hintImages.length),
+      firstPhoto.b64, firstPhoto.mime,
+      S.hintImages.slice(0,3)  // max 3 hint images to avoid token overflow
+    );
+
+    // Parse JSON
+    raw=raw.replace(/```json|```/g,'').trim();
+    const js=raw.indexOf('{'), je=raw.lastIndexOf('}');
+    if(js>=0&&je>js) raw=raw.slice(js,je+1);
+    let story;
+    try{ story=JSON.parse(raw); }
+    catch(e){ throw new Error(`스토리 JSON 파싱 실패: ${e.message}\n원본: ${raw.slice(0,200)}`); }
+
+    if(!story?.pages?.length) throw new Error('AI가 스토리 페이지를 생성하지 못했습니다. 다시 시도해보세요.');
+
+    S.story=story;
+    setStepStatus(stStep,'done',`📖 ${story.pages.length}페이지 스토리 완성!`);
+    logPit(`✨ 주제: ${story.theme||''}`, 'info');
+    logPit(`💡 교훈: ${story.moral||''}`, 'info');
+
+    // ── STEP B: Generate image for each page ──
+    for(let i=0; i<story.pages.length; i++) {
+      const pg=story.pages[i];
+      const photoIdx=Math.min(Math.max(0, pg.photoIndex??i%S.media.length), S.media.length-1);
+      const m=S.media[photoIdx];
+      const dlgC=(pg.dialogue||[]).map((d,j)=>({...d,color:BCOLORS[j%BCOLORS.length]}));
+
+      const imgStep=mkStep('🎨',`[${i+1}/${story.pages.length}] ${pg.chapter||''} 장면 그리는 중...`);
+      setStepStatus(imgStep,'run');
+
+      // Delay between pages (skip first)
+      if(i>0) await sleep(4200);
+
+      let imgSrc=m.thumb;
+      try{
+        const stylePrompt=STYLES[S.style]+`\n\nScene to illustrate: ${pg.imagePrompt||pg.narration||''}\nMood: ${pg.mood||'joyful'}\nStory chapter: ${pg.chapter||''}`;
+        const gen=await callImage(m.b64,m.mime,stylePrompt);
+        imgSrc=`data:${gen.mime};base64,${gen.b64}`;
+        setStepStatus(imgStep,'done',`[${i+1}] ✨ ${pg.chapter} 완성!`);
+      }catch(ie){
+        console.warn('img fail:',ie.message);
+        setStepStatus(imgStep,'err',`[${i+1}] 원본 사진 사용 (${ie.message.slice(0,45)})`);
+      }
+
+      // Compose canvas
+      const canvas=document.createElement('canvas');
+      await drawSpread(canvas,imgSrc,dlgC);
+      S.results[i]={
+        imgSrc:canvas.toDataURL('image/jpeg',.93),
+        narration:pg.narration||'',
+        dialogue:dlgC,
+        chapter:pg.chapter||''
+      };
+
+      // Open reader after first page ready
+      if(i===0) { goTo('rdr'); openReader(); }
+      else { buildDots(); if(S.cur===i) renderPage(i); }
+      checkEnableDownload();
+    }
+
+    logPit(`🎉 스토리북 완성! ${story.pages.length}페이지를 감상하세요.`,'done');
+
+  } catch(e) {
+    errBox.textContent='오류: '+e.message; errBox.classList.remove('hidden');
+    console.error(e);
+  }
+  btn.disabled=false;
+});
+
+/* ═══════════════════════════════════════════════════
+   READER
+═══════════════════════════════════════════════════ */
+function openReader(){
+  S.cur=0; $('rTitle').textContent=S.title||'영어 그림 스토리북';
+  buildDots(); renderPage(0);
+}
+
+function buildDots(){
+  const d=$('pdots'); d.innerHTML='';
+  const total=S.story?.pages?.length||S.results.length;
+  for(let i=0;i<total;i++){
+    const el=document.createElement('div');
+    el.className='pdot'+(i===0?' active':'')+(S.results[i]?' ready':'');
+    el.addEventListener('click',()=>{ttsStop();S.cur=i;renderPage(i);});
+    d.appendChild(el);
+  }
+}
+function updDots(){document.querySelectorAll('.pdot').forEach((d,i)=>{d.classList.toggle('active',i===S.cur);d.classList.toggle('ready',!!S.results[i]);});}
+
+async function renderPage(idx){
+  const total=S.story?.pages?.length||S.results.length;
+  $('pind').textContent=`${idx+1} / ${total}`;
+  $('prevBtn').disabled=idx===0;
+  $('nextBtn').disabled=idx>=total-1;
+  updDots();
+
+  const res=S.results[idx];
+  if(!res){
+    $('sload').classList.remove('hidden'); $('sCanvas').classList.add('hidden');
+    $('sloadTxt').textContent=`페이지 ${idx+1} 생성 중...`;
+    $('narrText').textContent='...'; $('dpLines').innerHTML=''; $('dpCap').classList.add('hidden');
+    return;
+  }
+  $('sload').classList.add('hidden'); $('sCanvas').classList.remove('hidden');
+  await drawSpread($('sCanvas'),res.imgSrc,res.dialogue);
+  $('narrText').textContent=res.narration||'';
+  renderDlg(res);
+  if(S.ttsAuto||S.ttsReadAll) startPageTTS(res);
+}
+
+function renderDlg(res){
+  const lines=$('dpLines'); lines.innerHTML='';
+  (res.dialogue||[]).forEach((d,i)=>{
+    const isR=d.side==='right'||i%2!==0;
+    const el=document.createElement('div'); el.className='dp-line'+(isR?' r':''); el.dataset.idx=i;
+    el.innerHTML=`<span class="dp-av">${d.emoji||'💬'}</span><div class="dp-bub" style="border-color:${d.color||'rgba(255,255,255,.15)'}55"><span class="spk-hint">🔊</span><strong style="color:${d.color||'#8BC975'}">${d.speaker}</strong><span>"${d.text}"</span></div>`;
+    el.querySelector('.dp-bub').addEventListener('click',()=>spkLine(d.text,d.speaker,i));
+    lines.appendChild(el);
+  });
+  const cap=$('dpCap');
+  const chLabels={'Opening':'🌅 이야기의 시작','Journey':'🚗 여정','Preparation':'🎒 준비','Arrival':'✨ 도착!','Exciting':'🎉 신나는 순간','Climax':'🏆 절정!','Giving':'💚 나눔','Resolution':'🌈 마무리','Ending':'🌙 꿈 속에서','Homecoming':'🏠 집으로'};
+  const label=chLabels[res.chapter]||res.chapter;
+  if(label){cap.textContent=label;cap.classList.remove('hidden');}else cap.classList.add('hidden');
+}
+
+$('prevBtn').addEventListener('click',()=>{if(S.cur>0){if(!S.ttsReadAll)ttsStop();S.cur--;renderPage(S.cur);}});
+$('nextBtn').addEventListener('click',()=>{const t=S.story?.pages?.length||S.results.length;if(S.cur<t-1){if(!S.ttsReadAll)ttsStop();S.cur++;renderPage(S.cur);}});
+$('exitBtn').addEventListener('click',()=>{ttsStop();goTo('s4')});
+$('regenBtn').addEventListener('click',()=>{ttsStop();goTo('s4')});
+$('newBtn').addEventListener('click',()=>{
+  if(!confirm('새 스토리북을 시작할까요? 현재 내용이 초기화됩니다.'))return;
+  ttsStop();
+  Object.assign(S,{title:'',hint:'',style:'pastel',media:[],pages:[],story:null,results:[],cur:0,ttsReadAll:false,ttsAuto:false,ttsOn:false,ttsPaused:false,hintImages:[]});
+  $('bookTitle').value='';$('storyHint').value='';$('mgrid').innerHTML='';$('plist').innerHTML='';
+  S.hintImages=[]; renderHintImgs(); enableDownloadBtns(false);
+  chk1();
+  document.querySelectorAll('.scard').forEach(e=>e.classList.remove('sel'));
+  document.querySelector('.scard[data-st="pastel"]').classList.add('sel');
+  goTo('s1');
+});
+
+/* ═══════════════════════════════════════════════════
+   TTS ENGINE — Full Interactive
+═══════════════════════════════════════════════════ */
+let _tQ=[], _tRun=false;
+
+function ttsStop(){
+  window.speechSynthesis.cancel(); _tQ=[]; _tRun=false;
+  S.ttsOn=false; S.ttsPaused=false; S.ttsReadAll=false;
+  updTUI();
+  document.querySelectorAll('.dp-bub').forEach(b=>b.classList.remove('sp'));
+  $('nbox')?.classList.remove('sp');
+}
+
+function pickVoice(who){
+  const vs=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));
+  if(!vs.length)return null;
+  const KIDS=['Child','Juan','Mia','Baby','Boy','Girl','Lily','Liam'];
+  const DADS=['Dad','Father','Papa','Grandpa'];
+  const F=['samantha','karen','victoria','moira','tessa','zoe','ava','google uk english female'];
+  const M=['daniel','arthur','oliver','george','aaron','google uk english male','google us english'];
+  if(KIDS.includes(who)) return vs.find(v=>F.some(x=>v.name.toLowerCase().includes(x)))||vs[0];
+  if(DADS.includes(who)) return vs.find(v=>M.some(x=>v.name.toLowerCase().includes(x)))||vs[0];
+  return vs.find(v=>F.some(x=>v.name.toLowerCase().includes(x)))||vs[0];
+}
+
+function runQ(){
+  if(!_tRun||!_tQ.length){
+    if(S.ttsReadAll&&_tRun){
+      const total=S.story?.pages?.length||S.results.length;
+      if(S.cur<total-1){ S.cur++; renderPage(S.cur); }
+      else ttsStop();
+    } else {
+      S.ttsOn=false; updTUI();
+      document.querySelectorAll('.dp-bub').forEach(b=>b.classList.remove('sp'));
+      $('nbox')?.classList.remove('sp');
+    }
+    return;
+  }
+  const item=_tQ.shift();
+  document.querySelectorAll('.dp-bub').forEach(b=>b.classList.remove('sp'));
+  $('nbox')?.classList.remove('sp');
+  if(item.type==='narr') $('nbox')?.classList.add('sp');
+  else if(item.idx>=0) document.querySelector(`.dp-line[data-idx="${item.idx}"] .dp-bub`)?.classList.add('sp');
+
+  const utt=new SpeechSynthesisUtterance(item.text);
+  utt.rate=S.ttsRate; utt.lang='en-US';
+  utt.pitch={Child:1.28,Juan:1.28,Mia:1.22,Dad:0.84,Father:0.84,Papa:0.84,Teacher:1.0,Narrator:1.02}[item.who]||1.0;
+  const v=pickVoice(item.who); if(v)utt.voice=v;
+  utt.onend=()=>setTimeout(runQ,360); utt.onerror=()=>setTimeout(runQ,200);
+  window.speechSynthesis.speak(utt);
+}
+
+function buildQ(res){
+  const q=[];
+  if(res.narration) q.push({text:res.narration,who:'Narrator',type:'narr',idx:-1});
+  (res.dialogue||[]).forEach((d,i)=>q.push({text:d.text,who:d.speaker,type:'dlg',idx:i}));
+  return q;
+}
+
+function startPageTTS(res){
+  window.speechSynthesis.cancel(); _tQ=buildQ(res); _tRun=true; S.ttsOn=true; updTUI(); runQ();
+}
+function spkNarr(txt){ttsStop();_tQ=[{text:txt,who:'Narrator',type:'narr',idx:-1}];_tRun=true;S.ttsOn=true;updTUI();runQ();}
+function spkLine(txt,who,idx){ttsStop();_tQ=[{text:txt,who,type:'dlg',idx}];_tRun=true;S.ttsOn=true;updTUI();runQ();}
+
+// Narration box click
+$('nbox').addEventListener('click',()=>{ const res=S.results[S.cur]; if(res?.narration) spkNarr(res.narration); });
+
+// Read Story button — all pages from beginning
+$('tStory').addEventListener('click',()=>{
+  if(S.ttsReadAll){ ttsStop(); return; }
+  ttsStop(); S.cur=0; S.ttsReadAll=true; S.ttsOn=true; renderPage(0);
+  setTimeout(()=>{const res=S.results[0];if(res){_tQ=buildQ(res);_tRun=true;updTUI();runQ();}},500);
+});
+// This Page button
+$('tPage').addEventListener('click',()=>{
+  const res=S.results[S.cur];
+  if(S.ttsOn&&!S.ttsReadAll){ttsStop();}
+  else if(res){if(S.ttsReadAll)ttsStop();startPageTTS(res);}
+});
+$('tPause').addEventListener('click',()=>{window.speechSynthesis.pause();S.ttsPaused=true;updTUI();});
+$('tResume').addEventListener('click',()=>{window.speechSynthesis.resume();S.ttsPaused=false;updTUI();});
+$('tStop').addEventListener('click',ttsStop);
+$('tAuto').addEventListener('click',()=>{S.ttsAuto=!S.ttsAuto;$('tAuto').classList.toggle('on',S.ttsAuto);$('tAuto').textContent=S.ttsAuto?'🔁 자동 ON':'🔁 자동넘기기';});
+$('tRateSlider').addEventListener('input',e=>{S.ttsRate=parseFloat(e.target.value);$('tRateLbl').textContent=S.ttsRate.toFixed(2)+'×';});
+
+function updTUI(){
+  const sp=S.ttsOn,pa=S.ttsPaused,ra=S.ttsReadAll;
+  $('tPage').textContent=sp&&!ra?'■ 정지':'▶ 이 페이지';
+  $('tPause').style.display=sp&&!pa?'flex':'none';
+  $('tResume').style.display=sp&&pa?'flex':'none';
+  $('tStop').style.display=sp?'flex':'none';
+  $('twave').style.display=sp&&!pa?'flex':'none';
+  $('tStory').textContent=ra?'■ 중단':'📖 Read Story';
+  $('tStory').classList.toggle('on',ra);
+}
+/* ═══════════════════════════════════════════════════
+   HINT IMAGE PASTE (Ctrl+V / drag-drop onto hint zone)
+═══════════════════════════════════════════════════ */
+function addHintImage(dataUrl, mime) {
+  const b64 = dataUrl.split(',')[1];
+  S.hintImages.push({b64, mime, thumb: dataUrl});
+  renderHintImgs();
+}
+
+function renderHintImgs() {
+  const box = $('hintImgs'); box.innerHTML = '';
+  S.hintImages.forEach((img, i) => {
+    const w = document.createElement('div'); w.className = 'hint-img-wrap';
+    w.innerHTML = `<img src="${img.thumb}"/><button class="hint-img-del" onclick="rmHintImg(${i})">✕</button>`;
+    box.appendChild(w);
+  });
+  const cnt = $('hintImgCount');
+  if (S.hintImages.length > 0) {
+    cnt.textContent = `+${S.hintImages.length}장 참고이미지`;
+    cnt.classList.remove('hidden');
+  } else {
+    cnt.classList.add('hidden');
+  }
+}
+window.rmHintImg = i => { S.hintImages.splice(i, 1); renderHintImgs(); };
+
+// Paste handler on hint textarea
+$('storyHint').addEventListener('paste', e => {
+  const items = e.clipboardData?.items || [];
+  let hasImg = false;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      hasImg = true;
+      const file = item.getAsFile();
+      const fr = new FileReader();
+      fr.onload = ev => addHintImage(ev.target.result, item.type);
+      fr.readAsDataURL(file);
+    }
+  }
+  // if only image, prevent text insert noise
+});
+
+// Drag-drop onto hint zone
+const hz = $('hintZone');
+hz.addEventListener('dragover', e => { e.preventDefault(); hz.classList.add('drag-over'); });
+hz.addEventListener('dragleave', () => hz.classList.remove('drag-over'));
+hz.addEventListener('drop', e => {
+  e.preventDefault(); hz.classList.remove('drag-over');
+  for (const file of (e.dataTransfer.files || [])) {
+    if (!file.type.startsWith('image/')) continue;
+    const fr = new FileReader();
+    fr.onload = ev => addHintImage(ev.target.result, file.type);
+    fr.readAsDataURL(file);
+  }
+  // Also handle dropped text
+  const txt = e.dataTransfer.getData('text');
+  if (txt) { const ta = $('storyHint'); ta.value += (ta.value ? '\n' : '') + txt; }
+});
+
+/* ═══════════════════════════════════════════════════
+   DOWNLOAD — PDF & JPG (ZIP) & Single Page
+═══════════════════════════════════════════════════ */
+function enableDownloadBtns(on) {
+  ['dlPdf','dlJpg','dlThis'].forEach(id => { const el=$(id); if(el) el.disabled=!on; });
+  const info = $('dbarInfo');
+  if(info) info.textContent = on ? `${S.results.filter(Boolean).length}페이지 준비됨` : '생성 완료 후 활성화';
+}
+
+function showDModal(title, desc) {
+  $('dmodalTitle').textContent = title;
+  $('dmodalDesc').textContent = desc;
+  $('dprogbar').style.width = '0%';
+  $('dstatus').textContent = '';
+  $('dmodalClose').classList.add('hidden');
+  $('dmodalBg').classList.remove('hidden');
+}
+function updDModal(pct, status) {
+  $('dprogbar').style.width = pct + '%';
+  $('dstatus').textContent = status;
+}
+function closeDModal() { $('dmodalBg').classList.add('hidden'); }
+$('dmodalClose').addEventListener('click', closeDModal);
+
+// ── Single page JPG ──
+$('dlThis').addEventListener('click', () => {
+  const res = S.results[S.cur];
+  if (!res) return;
+  const a = document.createElement('a');
+  a.href = res.imgSrc;
+  const safe = (S.title||'storybook').replace(/[^a-zA-Z0-9가-힣]/g,'_');
+  a.download = `${safe}_page${S.cur+1}.jpg`;
+  a.click();
+});
+
+// ── All pages JPG as ZIP ──
+$('dlJpg').addEventListener('click', async () => {
+  const ready = S.results.filter(Boolean);
+  if (!ready.length) return;
+  showDModal('🖼 JPG 전체 저장', `${ready.length}페이지를 ZIP으로 묶는 중...`);
+
+  try {
+    // Load JSZip dynamically if not present
+    if (typeof JSZip === 'undefined') {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+    }
+    const zip = new JSZip();
+    const safe = (S.title||'storybook').replace(/[^a-zA-Z0-9가-힣]/g,'_');
+    const folder = zip.folder(safe);
+
+    for (let i = 0; i < S.results.length; i++) {
+      const res = S.results[i];
+      if (!res) continue;
+      updDModal(Math.round((i+1)/S.results.length*85), `페이지 ${i+1} 처리 중...`);
+      // strip data url header
+      const b64 = res.imgSrc.split(',')[1];
+      folder.file(`page${String(i+1).padStart(2,'0')}.jpg`, b64, {base64:true});
+      await sleep(10);
+    }
+
+    updDModal(90, 'ZIP 파일 생성 중...');
+    const blob = await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}});
+    updDModal(100, '완료!');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${safe}_storybook.zip`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    $('dmodalClose').classList.remove('hidden');
+    $('dmodalDesc').textContent = `${ready.length}페이지 ZIP 저장 완료!`;
+  } catch(e) {
+    updDModal(100, '오류: ' + e.message);
+    $('dmodalClose').classList.remove('hidden');
+  }
+});
+
+// ── All pages PDF ──
+$('dlPdf').addEventListener('click', async () => {
+  const ready = S.results.filter(Boolean);
+  if (!ready.length) return;
+  showDModal('📄 PDF 전체 저장', `${ready.length}페이지 PDF를 만드는 중...`);
+
+  try {
+    if (typeof window.jspdf === 'undefined') {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+    const { jsPDF } = window.jspdf;
+    // A4 landscape: 297 x 210mm
+    const pdf = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+    const PW = 297, PH = 210;
+    const safe = (S.title||'storybook').replace(/[^a-zA-Z0-9가-힣 ]/g,' ');
+
+    // Cover page with title
+    pdf.setFillColor(30, 40, 25);
+    pdf.rect(0, 0, PW, PH, 'F');
+    pdf.setTextColor(255, 213, 102);
+    pdf.setFontSize(28);
+    pdf.setFont('helvetica','bold');
+    const titleLines = pdf.splitTextToSize(safe, PW - 40);
+    pdf.text(titleLines, PW/2, PH/2 - 10, {align:'center'});
+    pdf.setFontSize(12);
+    pdf.setTextColor(180, 200, 160);
+    pdf.text('English Picture Storybook', PW/2, PH/2 + 15, {align:'center'});
+    if (S.story?.theme) {
+      pdf.setFontSize(10); pdf.setTextColor(160,180,140);
+      const themeLines = pdf.splitTextToSize(S.story.theme, PW - 60);
+      pdf.text(themeLines, PW/2, PH/2 + 28, {align:'center'});
+    }
+
+    for (let i = 0; i < S.results.length; i++) {
+      const res = S.results[i];
+      if (!res) continue;
+      updDModal(Math.round((i+1)/S.results.length*90), `페이지 ${i+1}/${S.results.length} 추가 중...`);
+      pdf.addPage();
+
+      // Draw page image full-bleed
+      try {
+        const imgData = res.imgSrc; // already data URL
+        pdf.addImage(imgData, 'JPEG', 0, 0, PW, PH-22, '', 'FAST');
+      } catch(imgErr) { console.warn('pdf img err:', imgErr); }
+
+      // Dark footer bar
+      pdf.setFillColor(10, 15, 10);
+      pdf.rect(0, PH-22, PW, 22, 'F');
+
+      // Narration text in footer
+      if (res.narration) {
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(255, 245, 210);
+        pdf.setFont('helvetica','italic');
+        const narrLines = pdf.splitTextToSize(res.narration, PW - 60);
+        pdf.text(narrLines.slice(0,2), 10, PH-14);
+      }
+
+      // Page number
+      pdf.setFontSize(9); pdf.setTextColor(139,201,117); pdf.setFont('helvetica','normal');
+      pdf.text(`${i+1} / ${S.results.filter(Boolean).length}`, PW-12, PH-8, {align:'right'});
+
+      // Chapter label
+      if (res.chapter) {
+        pdf.setFontSize(8); pdf.setTextColor(255,215,102);
+        pdf.text(res.chapter.toUpperCase(), 10, PH-5);
+      }
+      await sleep(30);
+    }
+
+    // Moral/lesson last page
+    if (S.story?.moral) {
+      pdf.addPage();
+      pdf.setFillColor(18, 28, 18);
+      pdf.rect(0, 0, PW, PH, 'F');
+      pdf.setFontSize(16); pdf.setTextColor(255,215,102); pdf.setFont('helvetica','bold');
+      pdf.text('💡 The Story\'s Lesson', PW/2, PH/2-20, {align:'center'});
+      pdf.setFontSize(13); pdf.setTextColor(220,240,210); pdf.setFont('helvetica','italic');
+      const moralLines = pdf.splitTextToSize(S.story.moral, PW-60);
+      pdf.text(moralLines, PW/2, PH/2+2, {align:'center'});
+    }
+
+    updDModal(100, '완료!');
+    pdf.save(`${safe.replace(/\s+/g,'_')}_storybook.pdf`);
+    $('dmodalClose').classList.remove('hidden');
+    $('dmodalDesc').textContent = `${ready.length}페이지 PDF 저장 완료!`;
+  } catch(e) {
+    console.error(e);
+    updDModal(100, '오류: ' + e.message);
+    $('dmodalClose').classList.remove('hidden');
+  }
+});
+
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+// Enable after generation completes
+const _origLogDone = logPit;
+// Hook into results update to enable download buttons
+function checkEnableDownload() {
+  const ready = S.results.filter(Boolean).length;
+  if (ready > 0) enableDownloadBtns(true);
+}
+
+window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+window.speechSynthesis.getVoices();
+</script>
+</body>
+</html>
