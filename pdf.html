@@ -1,324 +1,609 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DocFlow — PDF 도구</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<style>
-:root{--border:#bae6fd;--accent:#0284c7;--navy:#1e40af;--green:#059669;--red:#dc2626;--muted:#64748b;--text:#0c1a2e;--sans:'Noto Sans KR',sans-serif;--mono:'Space Mono',monospace;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:linear-gradient(170deg,#fff 0%,#e0f2fe 55%,#bae6fd 100%);background-attachment:fixed;color:var(--text);font-family:var(--sans);min-height:100vh;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 10% 10%,rgba(186,230,253,.5) 0%,transparent 50%),radial-gradient(ellipse at 90% 90%,rgba(125,211,252,.35) 0%,transparent 50%);pointer-events:none;z-index:0;}
-.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:16px 20px 80px;}
-.page-title{text-align:center;margin-bottom:16px;}
-.page-title h1{font-size:22px;font-weight:700;color:var(--navy);}
-.page-title p{font-size:13px;color:var(--muted);margin-top:4px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인터랙티브 스토리북 빌더</title>
+    
+    <!-- 구글 폰트 적용: 프리텐다드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- 아이콘 (FontAwesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 필수 라이브러리: PDF 파싱, PDF 저장, Flipbook 3D 효과 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
 
-/* ilovepdf 버튼 바 */
-.ilove-bar{display:flex;gap:5px;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border:1px solid #bae6fd;border-radius:14px;padding:8px 14px;margin-bottom:14px;box-shadow:0 2px 12px rgba(2,132,199,.1);flex-wrap:wrap;align-items:center;}
-.ilove-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;white-space:nowrap;margin-right:4px;}
-.ilove-btn{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:none;border-radius:8px;padding:7px 11px;font-size:12px;font-family:var(--sans);font-weight:600;cursor:pointer;text-decoration:none;transition:all .18s;white-space:nowrap;box-shadow:0 2px 8px rgba(220,38,38,.22);}
-.ilove-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(220,38,38,.38);}
-.ilove-sep{width:1px;height:20px;background:#fca5a5;opacity:.5;flex-shrink:0;margin:0 1px;}
-.ilove-note{font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap;}
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #2d3436;
+        }
 
-/* 드롭존 */
-.dropzone{border:2px dashed #7dd3fc;border-radius:16px;padding:44px 32px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,.65);backdrop-filter:blur(8px);position:relative;overflow:hidden;box-shadow:0 2px 20px rgba(2,132,199,.08);}
-.dropzone::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(125,211,252,.18),transparent 60%);pointer-events:none;}
-.dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:rgba(255,255,255,.95);transform:translateY(-2px);box-shadow:0 10px 36px rgba(2,132,199,.18);}
-.dz-icon{font-size:48px;margin-bottom:14px;display:block;}
-.dz-title{font-size:16px;font-weight:600;margin-bottom:8px;}
-.dz-hint{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
-.btn-browse{display:inline-block;background:linear-gradient(135deg,#1e40af,#2563eb,#0ea5e9);color:#fff;border:none;border-radius:9px;padding:10px 26px;font-size:14px;font-family:var(--sans);font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(30,64,175,.32);}
-.btn-browse:hover{transform:translateY(-2px);}
-input[type="file"]{display:none;}
-.info-card{background:rgba(224,242,254,.8);border:1px solid rgba(2,132,199,.2);border-radius:12px;padding:14px 18px;margin-top:14px;font-size:13px;color:var(--muted);line-height:1.7;}
-.info-card strong{color:var(--text);}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
 
-/* 툴바 */
-.edit-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding:12px 16px;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);border:1px solid #bae6fd;border-radius:12px;align-items:center;}
-.tool-btn{display:flex;align-items:center;gap:5px;background:#f0f9ff;border:1px solid #bae6fd;color:var(--text);border-radius:8px;padding:8px 13px;font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .2s;font-weight:500;white-space:nowrap;}
-.tool-btn:hover{background:rgba(2,132,199,.1);border-color:var(--accent);color:var(--accent);}
-.tool-btn.danger:hover{background:rgba(220,38,38,.08);border-color:var(--red);color:var(--red);}
-.tool-btn.success{background:linear-gradient(135deg,#059669,#10b981);border-color:#059669;color:#fff;font-weight:700;}
-.tool-btn.success:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(5,150,105,.35);}
-.tool-btn:disabled{opacity:.4;cursor:not-allowed;}
-.tool-sep{width:1px;height:26px;background:#bae6fd;margin:0 2px;flex-shrink:0;}
-.sel-count{font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:auto;}
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 16px;
+        }
 
-/* 페이지 그리드 */
-.page-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;margin-top:14px;}
-.page-card{background:rgba(255,255,255,.88);border:2px solid #bae6fd;border-radius:10px;overflow:hidden;cursor:grab;transition:all .2s;position:relative;user-select:none;}
-.page-card:active{cursor:grabbing;}
-.page-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(2,132,199,.15);}
-.page-card.selected{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,64,175,.18);}
-.page-card.dragging{opacity:.35;transform:scale(.96);}
-.page-card.drag-over-top{border-top:3px solid var(--green);}
-.page-card.drag-over-bottom{border-bottom:3px solid var(--green);}
-.page-thumb{width:100%;aspect-ratio:0.707;background:#f1f5f9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.page-thumb canvas{width:100%!important;height:100%!important;object-fit:contain;display:block;}
-.page-thumb .ls{font-size:22px;animation:spin 1s linear infinite;color:var(--accent);}
-.page-footer{padding:7px 8px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #e0f2fe;background:rgba(255,255,255,.6);}
-.page-num{font-size:11px;font-family:var(--mono);color:var(--muted);}
-.page-check{width:15px;height:15px;accent-color:var(--navy);cursor:pointer;}
-.page-copy-badge{position:absolute;top:4px;right:4px;background:rgba(124,58,237,.85);color:#fff;border-radius:4px;font-size:9px;font-family:var(--mono);padding:2px 5px;}
+        .app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-/* 진행 */
-.progress-area{margin-top:14px;display:none;}
-.prog-text{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;}
-.prog-bar{height:6px;background:#bae6fd;border-radius:4px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,#1e40af,#0ea5e9);border-radius:4px;width:0%;transition:width .4s ease;}
+        /* Glassmorphism 메인 패널 */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: 0 10px 40px rgba(31, 38, 135, 0.1);
+            padding: 50px;
+            width: 100%;
+            max-width: 1100px;
+            display: none; 
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-/* 모달 */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;}
-.modal-overlay.show{display:flex;}
-.modal{background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border:1px solid #bae6fd;border-radius:16px;padding:28px 32px;max-width:420px;width:90%;animation:fadeUp .22s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
-@keyframes spin{to{transform:rotate(360deg);}}
-.modal h3{font-size:16px;font-weight:700;margin-bottom:10px;}
-.modal p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px;}
-.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
-.btn-ok{background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;}
+        .glass-panel.active {
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-@media(max-width:580px){
-  .ilove-btn{font-size:11px;padding:6px 8px;}
-  .ilove-note{display:none;}
-  .page-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
-}
-</style>
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #636e72;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        /* --- 업로드 영역 UI --- */
+        .upload-area {
+            border: 3px dashed var(--secondary);
+            border-radius: 24px;
+            padding: 70px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            background: rgba(255, 255, 255, 0.6);
+            position: relative;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            background: rgba(108, 92, 231, 0.08);
+            border-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(108, 92, 231, 0.15);
+        }
+
+        .upload-area i {
+            font-size: 4.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .upload-area:hover i {
+            transform: translateY(-5px);
+        }
+
+        .upload-area h3 {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .upload-area span {
+            color: #a4b0be;
+            font-size: 0.95rem;
+        }
+
+        #file-input { display: none; }
+
+        /* 하단 썸네일 미리보기 리스트 */
+        .preview-list {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .preview-item {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #dfe6e9;
+            opacity: 0.85;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .preview-item:hover {
+            opacity: 1;
+            transform: scale(1.15) rotate(2deg);
+            border-color: var(--primary);
+            z-index: 2;
+        }
+
+        /* --- 로딩 애니메이션 --- */
+        .loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 6px solid rgba(108, 92, 231, 0.15);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- 뷰어 영역 UI --- */
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .viewer-header h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls { display: flex; gap: 12px; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.25);
+        }
+
+        .btn:hover {
+            background: #5b4bc4;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+        }
+        
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn-outline:hover { background: var(--primary); color: white; }
+
+        /* 플립북 영역 */
+        .flipbook-wrapper {
+            width: 100%;
+            height: 65vh;
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 20px;
+            position: relative;
+            padding: 20px;
+            box-shadow: inset 0 2px 15px rgba(0,0,0,0.03);
+        }
+
+        .flipbook { width: 100%; height: 100%; }
+
+        .page {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            box-shadow: -3px 0 15px rgba(0,0,0,0.08); /* 책 특유의 그림자 느낌 */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page img, .page canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* 하단 네비게이션 컨트롤 */
+        .nav-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .nav-btn {
+            background: white;
+            border: none;
+            color: var(--text-main);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.25);
+        }
+
+        .page-info {
+            font-weight: 700;
+            color: #2d3436;
+            min-width: 80px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="page-title">
-    <h1>✂️ PDF 편집 도구</h1>
-    <p>페이지 순서 변경 · 삭제 · 복사 · 다른 PDF 삽입 · 저장</p>
-  </div>
 
-  <!-- ilovepdf 서비스 버튼 모음 -->
-  <div class="ilove-bar">
-    <span class="ilove-label">🔗 ilovepdf</span>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/compress_pdf');return false;">📉 PDF 압축</a>
-    <div class="ilove-sep"></div>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/pdf_to_excel');return false;">🔄 PDF→Excel</a>
-    <div class="ilove-sep"></div>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/pdf_to_word');return false;">🔄 PDF→word</a>
-    <div class="ilove-sep"></div>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/merge_pdf');return false;">🔗 PDF 합치기</a>
-    <div class="ilove-sep"></div>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/split_pdf');return false;">✂️ PDF 분할</a>
-    <div class="ilove-sep"></div>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/rotate_pdf');return false;">🔄 페이지회전</a>
-    <div class="ilove-sep"></div>
-    <a class="ilove-btn" href="#" onclick="openIlove('https://www.ilovepdf.com/ko/add_pdf_page_number');return false;">🔢 Page#추가</a>
-<div class="ilove-sep"></div>
-  </div>
+    <div class="app-container">
+        
+        <!-- 1. 메인 업로드 화면 -->
+        <div id="upload-screen" class="glass-panel active">
+            <h1><i class="fa-solid fa-book-open"></i> 인터랙티브 스토리북 빌더</h1>
+            <p class="subtitle">이미지나 PDF 파일을 업로드하면 한 권의 멋진 동화책으로 완성해 드립니다.</p>
+            
+            <div class="upload-area" id="drop-zone">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h3>이곳에 파일을 드래그 앤 드롭 하세요</h3>
+                <p>또는 클릭하여 파일을 선택할 수 있습니다</p>
+                <span style="display:block; margin-top:5px;"><i class="fa-solid fa-circle-info"></i> JPG, PNG 다중 선택 또는 PDF 파일 지원</span>
+                <input type="file" id="file-input" multiple accept="image/jpeg, image/png, application/pdf">
+            </div>
+            
+            <div class="preview-list" id="preview-list"></div>
+            
+            <div style="text-align: center; margin-top: 35px; display: none; opacity: 0; transition: opacity 0.5s;" id="start-btn-container">
+                <button class="btn" id="generate-btn" style="width: auto; min-width: 250px; padding: 15px 30px; font-size: 1.2rem; justify-content: center;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 마법의 동화책 펼치기
+                </button>
+            </div>
+        </div>
 
-  <!-- PDF 편집 -->
-  <div class="dropzone" id="dz-edit"
-       ondragover="event.preventDefault();this.classList.add('drag-over')"
-       ondragleave="this.classList.remove('drag-over')"
-       ondrop="handleDrop(event)"
-       onclick="document.getElementById('fi-edit').click()">
-    <span class="dz-icon">📄</span>
-    <h3 class="dz-title">편집할 PDF 파일을 드래그하거나 클릭하세요</h3>
-    <p class="dz-hint">페이지 순서 변경(드래그) · 삭제 · 복사 · 다른 PDF 삽입</p>
-    <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('fi-edit').click()">파일 선택</button>
-    <input type="file" id="fi-edit" accept=".pdf" onchange="loadEditPdf(event)">
-  </div>
+        <!-- 2. 로딩/변환 상태 화면 -->
+        <div id="loading-screen" class="glass-panel">
+            <div class="loader">
+                <div class="spinner"></div>
+                <h2>아름다운 동화책을 제본하는 중입니다...</h2>
+                <p class="subtitle" style="margin-top: 15px;">이미지가 많거나 PDF 용량이 클 경우 시간이 조금 걸릴 수 있습니다.</p>
+            </div>
+        </div>
 
-  <div id="editArea" style="display:none;">
-    <div class="edit-toolbar">
-      <button class="tool-btn" onclick="editSelectAll()">☑️ 전체선택</button>
-      <button class="tool-btn" onclick="editSelectNone()">◻️ 해제</button>
-      <div class="tool-sep"></div>
-      <button class="tool-btn" onclick="editMoveUp()">⬆️ 앞으로</button>
-      <button class="tool-btn" onclick="editMoveDown()">⬇️ 뒤로</button>
-      <div class="tool-sep"></div>
-      <button class="tool-btn" onclick="editCopy()">📋 복사</button>
-      <button class="tool-btn danger" onclick="editDelete()">🗑️ 삭제</button>
-      <div class="tool-sep"></div>
-      <button class="tool-btn" onclick="document.getElementById('fi-insert').click()">➕ PDF 삽입</button>
-      <input type="file" id="fi-insert" accept=".pdf" onchange="editInsertPdf(event)" style="display:none">
-      <div class="tool-sep"></div>
-      <button class="tool-btn success" onclick="editSave()">⬇️ PDF 저장</button>
-      <span class="sel-count" id="selCount">선택: 0 / 0</span>
+        <!-- 3. 실시간 플립북 뷰어 화면 -->
+        <div id="viewer-screen" class="glass-panel">
+            <div class="viewer-header">
+                <h2><i class="fa-solid fa-book-open-reader"></i> 나의 동화책</h2>
+                <div class="controls">
+                    <button class="btn btn-outline" id="btn-home"><i class="fa-solid fa-house"></i> 홈 이동</button>
+                    <button class="btn" id="btn-share"><i class="fa-solid fa-share-nodes"></i> 모바일 공유</button>
+                    <button class="btn" id="btn-pdf"><i class="fa-solid fa-download"></i> PDF로 저장</button>
+                </div>
+            </div>
+
+            <div class="flipbook-wrapper" id="flipbook-wrapper">
+                <div class="flipbook" id="flipbook"></div>
+            </div>
+
+            <div class="nav-controls">
+                <button class="nav-btn" id="btn-prev"><i class="fa-solid fa-chevron-left"></i></button>
+                <div class="page-info"><span id="page-current">0</span> / <span id="page-total">0</span></div>
+                <button class="nav-btn" id="btn-next"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+
     </div>
-    <div class="info-card">💡 <strong>드래그</strong>로 페이지 순서 변경 · 카드 클릭 또는 체크박스로 선택</div>
-    <div class="page-grid" id="pageGrid"></div>
-    <div class="progress-area" id="prog">
-      <div class="prog-text" id="progTxt">처리 중...</div>
-      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
-    </div>
-  </div>
-</div>
 
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <h3 id="modal-title">알림</h3>
-    <p id="modal-body"></p>
-    <div class="modal-btns"><button class="btn-ok" onclick="document.getElementById('modal').classList.remove('show')">확인</button></div>
-  </div>
-</div>
+    <!-- 기능 스크립트 -->
+    <script>
+        let uploadedFiles = [];
+        let pageImageDataUrls = []; 
+        let flipBookInstance = null;
 
-<script>
-if(typeof pdfjsLib!=='undefined')
-  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        // PDF.js 워커 세팅 (CDN 연동)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-/* ilovepdf 동일 탭 오픈 */
-let iloveWin=null;
-function openIlove(url){
-  if(!iloveWin||iloveWin.closed){
-    iloveWin=window.open(url,'ilovepdf_tab');
-  }else{
-    iloveWin.location.href=url;
-    iloveWin.focus();
-  }
-}
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewList = document.getElementById('preview-list');
+        const startBtnContainer = document.getElementById('start-btn-container');
+        const generateBtn = document.getElementById('generate-btn');
 
-/* 편집 상태 */
-const E={pages:[],fname:'',blobUrl:null,dragSrc:-1};
+        const uploadScreen = document.getElementById('upload-screen');
+        const loadingScreen = document.getElementById('loading-screen');
+        const viewerScreen = document.getElementById('viewer-screen');
 
-function handleDrop(e){
-  e.preventDefault();document.getElementById('dz-edit').classList.remove('drag-over');
-  const f=[...e.dataTransfer.files].find(f=>f.name.toLowerCase().endsWith('.pdf'));
-  if(f)loadPdfFile(f);
-}
-async function loadEditPdf(e){const f=e.target.files[0];e.target.value='';if(f)await loadPdfFile(f);}
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnHome = document.getElementById('btn-home');
+        const btnPdf = document.getElementById('btn-pdf');
+        const btnShare = document.getElementById('btn-share');
+        
+        const pageCurrent = document.getElementById('page-current');
+        const pageTotal = document.getElementById('page-total');
 
-async function loadPdfFile(file){
-  showProg(true);setProg(5,'PDF 로드 중...');
-  try{
-    const ab=await file.arrayBuffer();
-    const doc=await PDFLib.PDFDocument.load(ab,{ignoreEncryption:true});
-    E.fname=file.name.replace(/\.pdf$/i,'');
-    E.pages=Array.from({length:doc.getPageCount()},(_,i)=>({srcDoc:doc,srcIdx:i,sel:false,isCopy:false}));
-    document.getElementById('dz-edit').style.display='none';
-    document.getElementById('editArea').style.display='block';
-    await renderThumbs();updateSel();
-  }catch(err){alert2('오류',err.message);showProg(false);}
-}
+        /* 1. 드래그 앤 드롭 및 첨부 파일 파싱 */
+        dropZone.addEventListener('click', () => fileInput.click());
 
-const jsCache=new Map();
-async function getJsPdf(pdfLibDoc){
-  if(jsCache.has(pdfLibDoc))return jsCache.get(pdfLibDoc);
-  const b=await pdfLibDoc.save();
-  const d=await pdfjsLib.getDocument({data:b}).promise;
-  jsCache.set(pdfLibDoc,d);return d;
-}
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
 
-async function renderThumbs(){
-  const grid=document.getElementById('pageGrid');
-  grid.innerHTML='';
-  const n=E.pages.length;
-  for(let i=0;i<n;i++){
-    setProg(Math.round(5+(i/n)*88),`썸네일 (${i+1}/${n})`);
-    const pg=E.pages[i];
-    const card=document.createElement('div');
-    card.className='page-card';card.dataset.idx=i;
-    card.innerHTML=`<div class="page-thumb"><span class="ls">⏳</span></div>
-      <div class="page-footer">
-        <span class="page-num">p.${i+1}</span>
-        <input type="checkbox" class="page-check" id="chk${i}" onchange="onChk(${i})">
-      </div>${pg.isCopy?'<span class="page-copy-badge">복사</span>':''}`;
-    card.addEventListener('click',e=>{if(e.target.type==='checkbox')return;toggle(i);});
-    dragSetup(card,i);
-    grid.appendChild(card);
-    (async()=>{
-      try{
-        const jd=await getJsPdf(pg.srcDoc);
-        const p=await jd.getPage(pg.srcIdx+1);
-        const vp=p.getViewport({scale:1});
-        const sc=Math.min(280/vp.width,400/vp.height);
-        const svp=p.getViewport({scale:sc});
-        const cv=document.createElement('canvas');
-        cv.width=svp.width;cv.height=svp.height;
-        const ctx=cv.getContext('2d');
-        ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
-        await p.render({canvasContext:ctx,viewport:svp}).promise;
-        const th=card.querySelector('.page-thumb');th.innerHTML='';th.appendChild(cv);
-      }catch{card.querySelector('.page-thumb').innerHTML='<span style="font-size:10px;color:#aaa">미리보기 없음</span>';}
-    })();
-  }
-  setProg(100,'완료!');setTimeout(()=>showProg(false),700);
-}
+        fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
 
-function toggle(i){E.pages[i].sel=!E.pages[i].sel;document.getElementById('chk'+i).checked=E.pages[i].sel;document.getElementById('pageGrid').children[i].classList.toggle('selected',E.pages[i].sel);updateSel();}
-function onChk(i){E.pages[i].sel=document.getElementById('chk'+i).checked;document.getElementById('pageGrid').children[i].classList.toggle('selected',E.pages[i].sel);updateSel();}
-function updateSel(){document.getElementById('selCount').textContent=`선택: ${E.pages.filter(p=>p.sel).length} / ${E.pages.length}`;}
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            uploadedFiles = Array.from(files);
+            previewList.innerHTML = '';
+            
+            uploadedFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-item';
+                        previewList.appendChild(img);
+                    } else if (file.type === 'application/pdf') {
+                        const icon = document.createElement('div');
+                        icon.className = 'preview-item';
+                        icon.style.display = 'flex';
+                        icon.style.alignItems = 'center';
+                        icon.style.justifyContent = 'center';
+                        icon.style.fontSize = '24px';
+                        icon.style.color = 'var(--primary)';
+                        icon.innerHTML = '<i class="fa-solid fa-file-pdf"></i>';
+                        previewList.appendChild(icon);
+                    }
+                }
+                reader.readAsDataURL(file);
+            });
 
-function editSelectAll(){E.pages.forEach((_,i)=>{E.pages[i].sel=true;document.getElementById('chk'+i).checked=true;document.getElementById('pageGrid').children[i].classList.add('selected');});updateSel();}
-function editSelectNone(){E.pages.forEach((_,i)=>{E.pages[i].sel=false;document.getElementById('chk'+i).checked=false;document.getElementById('pageGrid').children[i].classList.remove('selected');});updateSel();}
+            startBtnContainer.style.display = 'block';
+            setTimeout(() => { startBtnContainer.style.opacity = '1'; }, 50);
+        }
 
-function editMoveUp(){const a=E.pages;for(let i=1;i<a.length;i++)if(a[i].sel&&!a[i-1].sel)[a[i-1],a[i]]=[a[i],a[i-1]];renderThumbs();}
-function editMoveDown(){const a=E.pages;for(let i=a.length-2;i>=0;i--)if(a[i].sel&&!a[i+1].sel)[a[i],a[i+1]]=[a[i+1],a[i]];renderThumbs();}
+        /* 2. 동화책 생성 프로세스 처리 */
+        generateBtn.addEventListener('click', async () => {
+            switchScreen(loadingScreen);
+            pageImageDataUrls = [];
 
-function editCopy(){
-  const c=E.pages.filter(p=>p.sel).map(p=>({...p,isCopy:true,sel:false}));
-  if(!c.length){alert2('알림','복사할 페이지를 선택하세요.');return;}
-  const last=E.pages.map((p,i)=>p.sel?i:-1).filter(i=>i>=0).pop()??E.pages.length-1;
-  E.pages.splice(last+1,0,...c);renderThumbs();updateSel();
-}
-function editDelete(){
-  if(!E.pages.some(p=>p.sel)){alert2('알림','삭제할 페이지를 선택하세요.');return;}
-  if(!E.pages.some(p=>!p.sel)){alert2('알림','모든 페이지를 삭제할 수 없습니다.');return;}
-  E.pages=E.pages.filter(p=>!p.sel);renderThumbs();updateSel();
-}
+            try {
+                const pdfFile = uploadedFiles.find(f => f.type === 'application/pdf');
+                
+                if (pdfFile) {
+                    await processPDFToImages(pdfFile);
+                } else {
+                    const imgFiles = uploadedFiles.filter(f => f.type.startsWith('image/'));
+                    for (let img of imgFiles) {
+                        const dataUrl = await readFileAsDataURL(img);
+                        pageImageDataUrls.push(dataUrl);
+                    }
+                }
 
-async function editInsertPdf(e){
-  const file=e.target.files[0];e.target.value='';if(!file)return;
-  showProg(true);setProg(10,'PDF 삽입 중...');
-  try{
-    const doc=await PDFLib.PDFDocument.load(await file.arrayBuffer(),{ignoreEncryption:true});
-    const last=E.pages.map((p,i)=>p.sel?i:-1).filter(i=>i>=0).pop()??E.pages.length-1;
-    E.pages.splice(last+1,0,...Array.from({length:doc.getPageCount()},(_,i)=>({srcDoc:doc,srcIdx:i,sel:false,isCopy:false})));
-    await renderThumbs();updateSel();
-  }catch(err){alert2('오류',err.message);showProg(false);}
-}
+                if (pageImageDataUrls.length > 0) {
+                    setTimeout(() => {
+                        initStPageFlip();
+                        switchScreen(viewerScreen);
+                    }, 800); 
+                } else {
+                    alert('등록된 처리할 페이지가 없습니다. 이미지 파일이나 PDF를 첨부해 주세요.');
+                    switchScreen(uploadScreen);
+                }
 
-async function editSave(){
-  if(!E.pages.length){alert2('알림','페이지가 없습니다.');return;}
-  showProg(true);setProg(5,'PDF 생성 중...');
-  try{
-    const out=await PDFLib.PDFDocument.create();
-    const map=new Map();
-    for(const p of E.pages){
-      if(!map.has(p.srcDoc)){
-        const idxs=[...new Set(E.pages.filter(x=>x.srcDoc===p.srcDoc).map(x=>x.srcIdx))];
-        map.set(p.srcDoc,{idxs,copied:await out.copyPages(p.srcDoc,idxs)});
-      }
-    }
-    E.pages.forEach((p,i)=>{
-      setProg(5+Math.round(i/E.pages.length*90),'합치는 중...');
-      const {idxs,copied}=map.get(p.srcDoc);
-      out.addPage(copied[idxs.indexOf(p.srcIdx)]);
-    });
-    const bytes=await out.save();
-    if(E.blobUrl)URL.revokeObjectURL(E.blobUrl);
-    E.blobUrl=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-    Object.assign(document.createElement('a'),{href:E.blobUrl,download:E.fname+'_edited.pdf'}).click();
-    setProg(100,'저장 완료!');setTimeout(()=>showProg(false),800);
-  }catch(err){alert2('오류',err.message);showProg(false);}
-}
+            } catch (error) {
+                console.error(error);
+                alert('파일을 책으로 변환하는 중 오류가 발생했습니다.');
+                switchScreen(uploadScreen);
+            }
+        });
 
-/* 드래그 */
-function dragSetup(card,idx){
-  card.draggable=true;
-  card.addEventListener('dragstart',e=>{E.dragSrc=+card.dataset.idx;card.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
-  card.addEventListener('dragend',()=>{card.classList.remove('dragging');document.querySelectorAll('.page-card').forEach(c=>c.classList.remove('drag-over-top','drag-over-bottom'));});
-  card.addEventListener('dragover',e=>{e.preventDefault();const s=E.dragSrc,t=+card.dataset.idx;document.querySelectorAll('.page-card').forEach(c=>c.classList.remove('drag-over-top','drag-over-bottom'));if(s!==t)card.classList.add(t>s?'drag-over-bottom':'drag-over-top');});
-  card.addEventListener('drop',e=>{e.preventDefault();const s=E.dragSrc,t=+card.dataset.idx;if(s===t)return;const m=E.pages.splice(s,1)[0];E.pages.splice(s<t?t:t,0,m);renderThumbs();updateSel();E.dragSrc=-1;});
-}
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsDataURL(file);
+            });
+        }
 
-/* UI 유틸 */
-function showProg(v){document.getElementById('prog').style.display=v?'block':'none';}
-function setProg(p,m){document.getElementById('progTxt').textContent=m;document.getElementById('progFill').style.width=p+'%';}
-function alert2(t,b){document.getElementById('modal-title').textContent=t;document.getElementById('modal-body').textContent=b;document.getElementById('modal').classList.add('show');}
-window.addEventListener('beforeunload',()=>{if(E.blobUrl)URL.revokeObjectURL(E.blobUrl);});
-</script>
+        async function processPDFToImages(file) {
+            const dataURL = await readFileAsDataURL(file);
+            const base64Data = dataURL.split(',')[1];
+            const pdfData = atob(base64Data);
+            
+            const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+            const pdf = await loadingTask.promise;
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 }); 
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                pageImageDataUrls.push(canvas.toDataURL('image/jpeg', 0.85));
+            }
+        }
+
+        /* 3. 책 뷰어 (StPageFlip) 설정 */
+        function initStPageFlip() {
+            const flipbookObj = document.getElementById('flipbook');
+            const wrapperObj = document.getElementById('flipbook-wrapper');
+            flipbookObj.innerHTML = ''; 
+
+            pageImageDataUrls.forEach((imgSrc) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'page';
+                pageDiv.innerHTML = `
+                    <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center; background:#ffffff;">
+                        <img src="${imgSrc}" style="max-width:90%; max-height:90%; object-fit:contain; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-radius: 4px;">
+                    </div>
+                `;
+                flipbookObj.appendChild(pageDiv);
+            });
+
+            if (flipBookInstance) {
+                flipBookInstance.destroy();
+                flipBookInstance = null;
+            }
+            
+            flipBookInstance = new StPageFlip.PageFlip(flipbookObj, {
+                width: 450,          
+                height: 600,         
+                size: "stretch",     
+                minWidth: 300, maxWidth: 800,
+                minHeight: 400, maxHeight: 1000,
+                maxShadowOpacity: 0.5, 
+                showCover: true,       
+                mobileScrollSupport: false,
+                usePortrait: true      
+            });
+
+            flipBookInstance.loadFromHTML(document.querySelectorAll('.page'));
+
+            setTimeout(() => {
+                pageTotal.innerText = flipBookInstance.getPageCount();
+                pageCurrent.innerText = "1";
+            }, 100);
+            
+            flipBookInstance.on('flip', (e) => { pageCurrent.innerText = e.data + 1; });
+        }
+
+        btnPrev.addEventListener('click', () => { if (flipBookInstance) flipBookInstance.flipPrev(); });
+        btnNext.addEventListener('click', () => { if (flipBookInstance) flipBookInstance.flipNext(); });
+
+        btnHome.addEventListener('click', () => {
+            uploadedFiles = [];
+            pageImageDataUrls = [];
+            previewList.innerHTML = '';
+            fileInput.value = '';
+            startBtnContainer.style.opacity = '0';
+            setTimeout(() => { startBtnContainer.style.display = 'none'; }, 500);
+            switchScreen(uploadScreen);
+            if(flipBookInstance) flipBookInstance.destroy();
+        });
+
+        /* 4. 공유 및 PDF 저장 */
+        btnPdf.addEventListener('click', () => {
+            if (!pageImageDataUrls || pageImageDataUrls.length === 0) return;
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('l', 'mm', 'a4'); 
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            pageImageDataUrls.forEach((src, index) => {
+                if (index > 0) pdf.addPage();
+                pdf.addImage(src, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            });
+            pdf.save('나의_인터랙티브_스토리북.pdf');
+        });
+
+        btnShare.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: '나의 인터랙티브 스토리북',
+                        text: '제가 만든 놀라운 모바일 스토리북을 확인해 보세요!',
+                        url: window.location.href, 
+                    });
+                } catch (err) { console.error('공유 실패:', err); }
+            } else {
+                alert('현재 브라우저에서는 공유 기능을 지원하지 않습니다.\n대신 [PDF로 저장] 버튼을 이용해 보세요!');
+            }
+        });
+
+        function switchScreen(targetScreenEl) {
+            document.querySelectorAll('.glass-panel').forEach(panel => { panel.classList.remove('active'); });
+            setTimeout(() => { targetScreenEl.classList.add('active'); }, 50);
+        }
+    </script>
 </body>
 </html>
-
