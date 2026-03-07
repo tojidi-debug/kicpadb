@@ -1,1037 +1,480 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF 보기 및 편집</title>
+    <title>HanAI PDF 통합 워크스페이스</title>
 
-    <!-- jQuery & Turn.js for Flipbook effect -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://raw.githack.com/blasten/turn.js/master/turn.min.js"></script>
-
-    <!-- PDF.js for Reading uploaded PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-    </script>
-    <!-- jsPDF for Exporting to PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
-        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono&display=swap" rel="stylesheet">
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Noto Sans KR', sans-serif;
+        /* 기본 스타일 및 우주 배경 애니메이션 */
+        :root {
+            --accent: #1CB5E0;
+            --navy: #1a237e;
+            --dark: #0a0e27;
+            --gold: #FFD700;
         }
 
-        body {
-            background: #eef5fb;
-            color: #333;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }
+        body { background: var(--dark); color: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        @keyframes nebula { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
+        .space-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(ellipse at top, #1a237e 0%, #0a0e27 50%), radial-gradient(ellipse at bottom, #0d1b3e 0%, #000000 100%);
+        }
+        .space-bg::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 50%, rgba(138, 43, 226, 0.15) 0%, transparent 80%);
+            animation: nebula 10s ease-in-out infinite;
         }
 
-        /* --- 상단 글로벌 통합 헤더 --- */
-        #global-header {
-            background: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 1000;
+        /* 헤더 스타일 */
+        header {
+            height: 70px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+            border-bottom: 1px solid rgba(28, 181, 224, 0.3); z-index: 1000;
         }
+        .logo { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #fff; cursor: pointer; }
+        .logo span { color: var(--gold); }
 
-        .main-title {
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #1a56db;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* 탭 네비게이션 버튼들 */
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            background: #f1f5f9;
-            padding: 6px;
-            border-radius: 30px;
-        }
-
+        .tab-nav { display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 40px; }
         .tab-btn {
-            background: transparent;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 20px;
-            font-weight: 700;
-            color: #64748b;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.95rem;
+            border: none; background: transparent; color: #aaa; padding: 8px 25px; border-radius: 30px;
+            font-weight: 700; cursor: pointer; transition: 0.3s;
         }
+        .tab-btn.active { background: var(--accent); color: #fff; box-shadow: 0 0 15px rgba(28,181,224,0.5); }
 
-        .tab-btn.active {
-            background: white;
-            color: #1a56db;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+        /* 콘텐츠 공통 */
+        main { flex: 1; position: relative; overflow: hidden; }
+        .tab-content { display: none; width: 100%; height: 100%; overflow-y: auto; padding: 40px 20px; }
+        .tab-content.active { display: block; }
 
-        .tab-btn:hover:not(.active) {
-            color: #334155;
-            background: #e2e8f0;
-        }
-
-        /* ilovepdf 특별 버튼 (파랑+하늘색 그라데이션) */
-        .btn-ilovepdf {
-            background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-            color: white !important;
-            font-weight: 900;
-            box-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
-            border-radius: 20px;
-            padding: 10px 24px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            font-size: 0.95rem;
-            margin-left: 5px;
-            transition: transform 0.1s;
-        }
-
-        .btn-ilovepdf:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.6);
-        }
-
-        .btn-ilovepdf:active {
-            transform: scale(0.95);
-        }
-
-        /* --- 콘텐츠 래퍼 --- */
-        #content-area {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-        }
-
-        /* 1. PDF 편집 탭 (iframe으로 처리) */
-        #tab-pdfedit {
-            display: none;
-            width: 100%;
-            height: 100%;
-        }
-
-        #tab-pdfedit iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-
-        /* 2. 책처럼 보기 탭 (Interactive Storybook) */
-        #tab-storybook {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* === 책처럼 보기 내부 UI (기존 interactive_storybook 이식) === */
-        #setup-screen {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
-            background: #eef5fb;
-        }
-
+        /* [탭1] 책처럼 보기 스타일 */
         #drop-zone {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 240px;
-            border: 2px dashed #90caf9;
-            border-radius: 12px;
-            background-color: #f8fbff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-            text-align: center;
+            max-width: 800px; margin: 40px auto; height: 300px; border: 2px dashed var(--accent);
+            border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.03); cursor: pointer; transition: 0.3s;
         }
+        #drop-zone:hover { background: rgba(28,181,224,0.1); }
+        .preview-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; max-width: 1000px; margin: 30px auto; }
+        .preview-item { width: 100px; height: 140px; background: #fff; border-radius: 8px; position: relative; overflow: hidden; }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-pg { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); border: none; color: #fff; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; }
 
-        #drop-zone:hover,
-        #drop-zone.dragover {
-            background-color: #e3f2fd;
-            border-color: #2196F3;
+        /* [탭2] PDF 편집 스타일 */
+        .edit-container { max-width: 1100px; margin: 0 auto; }
+        .toolbar { 
+            background: rgba(255,255,255,0.9); padding: 12px; border-radius: 12px; display: flex; gap: 8px; 
+            flex-wrap: wrap; margin-bottom: 20px; color: #333; align-items: center;
         }
-
-        .icon-doc {
-            width: 40px;
-            height: 50px;
-            background: linear-gradient(135deg, #e0e0e0 70%, #bdbdbd 70%);
-            border-radius: 4px;
-            position: relative;
-            margin-bottom: 15px;
+        .tool-btn { 
+            padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            background: #f8fafc; transition: 0.2s;
         }
-
-        .icon-doc::before {
-            content: '';
-            position: absolute;
-            top: 12px;
-            left: 8px;
-            right: 8px;
-            height: 2px;
-            background: #fff;
-            box-shadow: 0 6px 0 #fff, 0 12px 0 #fff;
+        .tool-btn:hover { background: #e2e8f0; }
+        .tool-btn.primary { background: var(--navy); color: #fff; border: none; }
+        .page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        .page-card { 
+            background: #fff; border: 3px solid transparent; border-radius: 10px; padding: 10px; cursor: grab;
+            transition: 0.2s; position: relative; color: #333;
         }
+        .page-card.selected { border-color: var(--accent); background: #eefaff; }
+        .page-thumb { width: 100%; aspect-ratio: 0.75; background: #eee; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+        .page-thumb canvas { max-width: 100%; max-height: 100%; }
 
-        #drop-zone p {
-            font-size: 1.1rem;
-            color: #111;
-            font-weight: 700;
-            margin-bottom: 6px;
-            pointer-events: none;
+        /* 뷰어 오버레이 (Flipbook) */
+        #viewer-overlay {
+            position: fixed; inset: 0; background: #f0f4f8; z-index: 2000; display: none; flex-direction: column;
         }
+        .viewer-header { height: 60px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #333; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        #flipbook-container { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .click-area { position: absolute; top: 0; bottom: 80px; width: 40%; z-index: 10; cursor: pointer; }
+        #go-prev { left: 0; } #go-next { right: 0; }
+        .bottom-nav { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 100; }
+        .nav-btn { background: rgba(0,0,0,0.6); color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
 
-        #drop-zone span {
-            font-size: 0.85rem;
-            color: #777;
-            pointer-events: none;
-        }
+        /* 저장 다이얼로그 */
+        #save-dlg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        .dlg-content { background: #fff; padding: 30px; border-radius: 15px; width: 400px; color: #333; }
+        .dlg-content input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
 
-        #file-input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            z-index: 10;
-        }
-
-        #preview-container {
-            width: 100%;
-            max-width: 600px;
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .preview-item {
-            width: 70px;
-            height: 70px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            overflow: hidden;
-            position: relative;
-            background: white;
-        }
-
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .preview-item .page-num {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 5px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-
-        #start-btn-container {
-            text-align: center;
-            margin-top: 25px;
-            display: none;
-        }
-
-        .btn-create-book {
-            background: linear-gradient(to right, #1d4ed8, #2563eb);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 1.05rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-            transition: transform 0.1s;
-        }
-
-        .btn-create-book:active {
-            transform: scale(0.96);
-        }
-
-        .btn-clear-upload {
-            background: #fef2f2;
-            color: #ef4444;
-            border: 2px solid #fecaca;
-            padding: 11px 25px;
-            font-size: 1.05rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: all 0.1s;
-        }
-
-        .btn-clear-upload:hover {
-            background: #fee2e2;
-            border-color: #fca5a5;
-        }
-
-        .remove-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 20px;
-            height: 20px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 14px;
-            line-height: 20px;
-            cursor: pointer;
-            z-index: 20;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 로딩 모달 */
-        #global-loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .spinner {
-            width: 45px;
-            height: 45px;
-            border: 4px solid #e0e0e0;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* --- 풀스크린 뷰어 --- */
-        #viewer-screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            background: #eef5fb;
-            flex-direction: column;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2000;
-            /* 글로벌 헤더 덮기 위해 2000 */
-        }
-
-        .viewer-toolbar {
-            height: 50px;
-            background: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
-            z-index: 100;
-        }
-
-        .toolbar-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .toolbar-btn {
-            background: white;
-            color: #444;
-            border: 1px solid #e0e0e0;
-            padding: 6px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 700;
-            transition: 0.1s;
-        }
-
-        .toolbar-btn:hover {
-            background: #f5f5f5;
-            color: #111;
-        }
-
-        .toolbar-btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-clear {
-            border-color: #ffcdd2;
-            color: #ef4444;
-        }
-
-        .btn-clear:hover {
-            background: #fef2f2;
-            border-color: #fca5a5;
-        }
-
-        .btn-fullscreen {
-            background: #f3e8ff;
-            border-color: #d8b4fe;
-            color: #7e22ce;
-            margin-left: 8px;
-            margin-right: 8px;
-        }
-
-        .btn-fullscreen:hover {
-            background: #e9d5ff;
-            border-color: #c084fc;
-        }
-
-        .btn-download {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-            color: #2563eb;
-        }
-
-        .btn-download:hover {
-            background: #dbeafe;
-        }
-
-        .btn-share {
-            background: #fff7ed;
-            border-color: #fed7aa;
-            color: #ea580c;
-        }
-
-        .btn-share:hover {
-            background: #ffedd5;
-        }
-
-        #book-wrapper {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #flipbook {
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
-            display: none;
-            background: white;
-        }
-
-        .book-page {
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .page-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* 하단 네비게이션: 처음으로, 이전, 다음, 마지막으로 */
-        .bottom-nav {
-            position: absolute;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 8px 12px;
-            border-radius: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.6);
-            color: #333;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.1s ease-out;
-            outline: none;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 1);
-            color: #000;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-btn:active {
-            transform: scale(0.92);
-            background: #e0e0e0;
-        }
-
-        .click-zone {
-            position: absolute;
-            top: 0;
-            bottom: 80px;
-            width: 50%;
-            cursor: pointer;
-            z-index: 50;
-        }
-
-        #zone-prev {
-            left: 0;
-        }
-
-        #zone-next {
-            right: 0;
-        }
-
-        /* 공유 모달 */
-        #share-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .share-content {
-            background: white;
-            border-radius: 16px;
-            padding: 30px 25px;
-            width: 340px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.2s ease-out;
-        }
-
-        @keyframes slideUp {
-            0% {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .share-title {
-            font-size: 1.1rem;
-            font-weight: 900;
-            margin-bottom: 25px;
-            color: #111;
-        }
-
-        .share-icons {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            gap: 10px;
-        }
-
-        .share-icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: #555;
-            font-weight: 500;
-            transition: transform 0.1s;
-            width: 60px;
-        }
-
-        .share-icon-btn:hover {
-            transform: translateY(-3px);
-            color: #111;
-        }
-
-        .share-icon-btn:active {
-            transform: scale(0.9);
-        }
-
-        .icon-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .bg-kakao {
-            background: #FEE500;
-            color: #3b1e1e;
-        }
-
-        .bg-insta {
-            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-        }
-
-        .bg-yt {
-            background: #FF0000;
-        }
-
-        .bg-link {
-            background: #475569;
-        }
-
-        .btn-close-modal {
-            background: #f1f5f9;
-            color: #475569;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 700;
-            transition: 0.1s;
-            font-size: 0.95rem;
-        }
-
-        .btn-close-modal:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
+        /* 로딩 유틸 */
+        #loading { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #333; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-
 <body>
 
-    <!-- 공통 헤더 (탭 제어) -->
-    <div id="global-header">
-        <div class="main-title">✂️ PDF 보기 및 편집</div>
-        <div class="tab-buttons">
-            <button class="tab-btn active" id="btn-tab-storybook" onclick="switchTab('storybook')">책처럼 보기</button>
-            <button class="tab-btn" id="btn-tab-pdfedit" onclick="switchTab('pdfedit')">PDF 편집</button>
-            <a href="https://www.ilovepdf.com/ko" target="_blank" class="btn-ilovepdf">❤️ ilovepdf</a>
+    <div class="space-bg"></div>
+
+    <header>
+        <div class="logo" onclick="location.reload()">HanAI <span>PDF Workspace</span></div>
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('book')">📖 책처럼 보기</button>
+            <button class="tab-btn" onclick="switchTab('edit')">✂️ PDF 편집</button>
         </div>
-    </div>
+        <div style="width:150px; text-align:right;">
+            <a href="https://www.ilovepdf.com/ko" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:bold; font-size:13px;">❤️ ilovepdf</a>
+        </div>
+    </header>
 
-    <!-- 탭 본문 영역 -->
-    <div id="content-area">
-
-        <!-- [탭 1] 책처럼 보기 (Interactive Storybook) -->
-        <div id="tab-storybook">
-            <div id="setup-screen">
-                <div id="drop-zone">
-                    <div class="icon-doc"></div>
-                    <p>보실 파일을 드래그하거나 클릭하세요</p>
-                    <span>이미지(JPG/PNG) 또는 PDF 혼합 지원</span>
-                    <input type="file" id="file-input" multiple accept="image/*, application/pdf">
-                </div>
-                <div id="preview-container"></div>
-                <div id="start-btn-container">
-                    <button class="btn-create-book" onclick="startFlipbook()">책처럼 넘겨보기</button>
-                    <button class="btn-clear-upload" onclick="clearAll()">초기화(Clear)</button>
-                </div>
+    <main>
+        <div id="tab-book" class="tab-content active">
+            <div id="drop-zone" onclick="document.getElementById('file-book').click()">
+                <h2 style="margin-bottom:10px;">파일을 여기에 놓으세요</h2>
+                <p>PDF 또는 이미지(JPG, PNG) 다중 선택 가능</p>
+                <input type="file" id="file-book" multiple accept="application/pdf, image/*" style="display:none" onchange="handleFileSelect(event, 'book')">
+            </div>
+            <div id="book-previews" class="preview-grid"></div>
+            <div id="book-controls" style="text-align:center; display:none; margin-top:20px;">
+                <button class="nav-btn" style="background:var(--accent); padding:15px 40px; font-size:18px;" onclick="startFlipbook()">✨ 책으로 펼치기</button>
+                <button class="nav-btn" style="background:#444;" onclick="resetApp('book')">초기화</button>
             </div>
         </div>
 
-        <!-- [탭 2] PDF 편집 (기존 PDF 편집 도구) -->
-        <div id="tab-pdfedit">
-            <!-- 사용자 코드가 누락되어, 사용자의 직전 알려진 PDF 편집 도구 URL을 iframe으로 매끄럽게 연동합니다 -->
-            <iframe src="https://tojidi-debug.github.io/kicpadb/pdf.html"></iframe>
-            <!-- 추후 이 자리에 언제든 자체 코드를 붙여넣으셔도 완벽하게 작동합니다 -->
-        </div>
+        <div id="tab-edit" class="tab-content">
+            <div class="edit-container">
+                <div id="edit-upload" style="text-align:center; padding:50px;">
+                    <button class="nav-btn" style="background:var(--accent); padding:15px 30px;" onclick="document.getElementById('file-edit').click()">편집할 PDF 불러오기</button>
+                    <input type="file" id="file-edit" accept=".pdf" style="display:none" onchange="handleFileSelect(event, 'edit')">
+                </div>
 
-    </div>
-
-    <!-- 전체화면 뷰어 오버레이 (책처럼 보기 전용) -->
-    <div id="viewer-screen">
-        <div class="viewer-toolbar">
-            <button class="toolbar-btn" onclick="exitViewer()">⬅ 목록으로 돌아가기</button>
-            <div class="toolbar-group">
-                <button class="toolbar-btn btn-clear" onclick="clearAll()">🧹 Clear</button>
-                <button class="toolbar-btn btn-fullscreen" onclick="toggleFullScreen()">📺 전체화면 보기</button>
-                <button class="toolbar-btn btn-download" onclick="downloadPDF()">⬇️ PDF 다운로드</button>
-                <button class="toolbar-btn btn-share" onclick="openShareModal()">🔗 공유</button>
+                <div id="edit-workspace" style="display:none;">
+                    <div class="toolbar">
+                        <button class="tool-btn" onclick="editAction('selectAll')">☑️ 전체선택</button>
+                        <button class="tool-btn" onclick="editAction('selectNone')">◻️ 해제</button>
+                        <span style="margin:0 10px; color:#ccc;">|</span>
+                        <button class="tool-btn" onclick="editAction('moveUp')">⬆️ 앞으로</button>
+                        <button class="tool-btn" onclick="editAction('moveDown')">⬇️ 뒤로</button>
+                        <button class="tool-btn" onclick="editAction('rotate')">🔄 90° 회전</button>
+                        <button class="tool-btn" onclick="editAction('copy')">📋 복사</button>
+                        <button class="tool-btn" style="color:red" onclick="editAction('delete')">🗑️ 삭제</button>
+                        <span style="margin:0 10px; color:#ccc;">|</span>
+                        <button class="tool-btn" onclick="document.getElementById('file-insert').click()">➕ PDF 삽입</button>
+                        <input type="file" id="file-insert" accept=".pdf" style="display:none" onchange="insertPdf(event)">
+                        <button class="tool-btn primary" style="margin-left:auto" onclick="showSaveDlg()">💾 PDF 저장하기</button>
+                    </div>
+                    <div id="edit-grid" class="page-grid"></div>
+                </div>
             </div>
         </div>
+    </main>
 
-        <div id="book-wrapper">
+    <div id="viewer-overlay">
+        <div class="viewer-header">
+            <button class="tool-btn" onclick="closeViewer()">⬅️ 목록으로</button>
+            <b id="viewer-title">동화책 모드</b>
+            <div style="display:flex; gap:10px;">
+                <button class="tool-btn" onclick="downloadBook()">⬇️ PDF 다운로드</button>
+                <button class="tool-btn primary" onclick="toggleFullScreen()">📺 전체화면</button>
+            </div>
+        </div>
+        <div id="flipbook-container">
             <div id="flipbook"></div>
-            <!-- 클릭 영역을 50%로 확장하여 절반 클릭 시 넘어가도록 수정 -->
-            <div id="zone-prev" class="click-zone" onclick="turnPrev()"></div>
-            <div id="zone-next" class="click-zone" onclick="turnNext()"></div>
-
+            <div id="go-prev" class="click-area" onclick="turn('prev')"></div>
+            <div id="go-next" class="click-area" onclick="turn('next')"></div>
             <div class="bottom-nav">
-                <button class="nav-btn" onclick="turnHome()">처음으로</button>
-                <button class="nav-btn" onclick="turnPrev()">이전</button>
-                <button class="nav-btn" onclick="turnNext()">다음</button>
-                <button class="nav-btn" onclick="turnLast()">마지막으로</button>
+                <button class="nav-btn" onclick="turn('first')">처음</button>
+                <button class="nav-btn" onclick="turn('prev')">이전</button>
+                <button class="nav-btn" onclick="turn('next')">다음</button>
+                <button class="nav-btn" onclick="turn('last')">끝</button>
             </div>
         </div>
     </div>
 
-    <!-- 글로벌 로딩 -->
-    <div id="global-loading">
+    <div id="save-dlg">
+        <div class="dlg-content">
+            <h3>저장 설정</h3>
+            <p style="font-size:13px; color:#666; margin-top:5px;">파일명을 입력하세요.</p>
+            <input type="text" id="out-filename" placeholder="결과물파일명">
+            <div style="display:flex; gap:10px;">
+                <button class="tool-btn" style="flex:1" onclick="$('#save-dlg').hide()">취소</button>
+                <button class="tool-btn primary" style="flex:1" onclick="performSave()">💾 저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading">
         <div class="spinner"></div>
-        <p id="loading-msg">처리 중...</p>
-    </div>
-
-    <!-- 공유 모달 -->
-    <div id="share-modal">
-        <div class="share-content">
-            <div class="share-title">파일 공유하기</div>
-            <div class="share-icons">
-                <button class="share-icon-btn" onclick="shareSocial('kakao')">
-                    <div class="icon-circle bg-kakao">K</div>카카오톡
-                </button>
-                <button class="share-icon-btn" onclick="shareSocial('insta')">
-                    <div class="icon-circle bg-insta">In</div>인스타그램
-                </button>
-                <button class="share-icon-btn" onclick="shareSocial('youtube')">
-                    <div class="icon-circle bg-yt">▶</div>유튜브
-                </button>
-                <button class="share-icon-btn" onclick="shareSocial('link')">
-                    <div class="icon-circle bg-link">🔗</div>링크복사
-                </button>
-            </div>
-            <button class="btn-close-modal" onclick="closeShareModal()">닫기</button>
-        </div>
+        <p id="loading-txt" style="margin-top:20px;">처리 중...</p>
     </div>
 
     <script>
-        // --- 탭 컨트롤 시스템 ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-tab-' + tabId).classList.add('active');
+        /** 공통 상태 관리 **/
+        let bookPages = []; // 탭1용 이미지 데이터 (DataURL)
+        let editPages = []; // 탭2용 편집 데이터 {srcDoc, srcIdx, rot, sel}
+        let currentTab = 'book';
 
-            document.getElementById('tab-storybook').style.display = (tabId === 'storybook') ? 'flex' : 'none';
-            document.getElementById('tab-pdfedit').style.display = (tabId === 'pdfedit') ? 'block' : 'none';
+        /** 탭 전환 **/
+        function switchTab(id) {
+            currentTab = id;
+            $('.tab-btn').removeClass('active');
+            $(`.tab-btn[onclick="switchTab('${id}')"]`).addClass('active');
+            $('.tab-content').removeClass('active');
+            $(`#tab-${id}`).addClass('active');
         }
 
-        // --- 책처럼 보기 (Flipbook) 핵심 로직 ---
-        let pageImages = [];
-        let flipbookInitialized = false;
-
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.getElementById('drop-zone');
-
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault(); dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) processFiles(e.dataTransfer.files);
-        });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) processFiles(e.target.files);
-        });
-
-        async function processFiles(files) {
-            showLoading("파일을 분석하고 있습니다...");
-            const fileArray = Array.from(files);
-
-            for (let i = 0; i < fileArray.length; i++) {
-                const file = fileArray[i];
-                if (file.type.startsWith('image/')) {
-                    const dataUrl = await readImageFile(file);
-                    pageImages.push(dataUrl);
-                } else if (file.type === 'application/pdf') {
-                    await processPdfFile(file);
+        /** 파일 처리 로직 **/
+        async function handleFileSelect(e, type) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            
+            showLoading("파일을 읽고 분석하는 중...");
+            
+            for (const file of files) {
+                if (file.type === 'application/pdf') {
+                    await processPdf(file, type);
+                } else if (file.type.startsWith('image/')) {
+                    const url = await readFileAsDataURL(file);
+                    if (type === 'book') bookPages.push(url);
                 }
             }
-            renderThumbnails();
+            
+            if (type === 'book') renderBookPreviews();
             hideLoading();
+            e.target.value = '';
         }
 
-        function readImageFile(file) {
-            return new Promise(resolve => {
+        async function processPdf(file, type) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            
+            if (type === 'book') {
+                for (let i = 1; i <= pdfDoc.numPages; i++) {
+                    const page = await pdfDoc.getPage(i);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = viewport.width; canvas.height = viewport.height;
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    bookPages.push(canvas.toDataURL('image/jpeg', 0.8));
+                }
+            } else {
+                const libDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                for (let i = 0; i < libDoc.getPageCount(); i++) {
+                    editPages.push({ srcDoc: libDoc, srcIdx: i, rot: 0, sel: false });
+                }
+                $('#edit-upload').hide();
+                $('#edit-workspace').show();
+                renderEditGrid();
+            }
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise(r => {
                 const reader = new FileReader();
-                reader.onload = e => resolve(e.target.result);
+                reader.onload = e => r(e.target.result);
                 reader.readAsDataURL(file);
             });
         }
 
-        async function processPdfFile(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                document.getElementById('loading-msg').innerText = `PDF 추출 중... (${pageNum}/${pdfDoc.numPages})`;
-                const page = await pdfDoc.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 2.0 });
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = viewport.width; canvas.height = viewport.height;
-                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                pageImages.push(canvas.toDataURL('image/jpeg', 0.85));
+        /** [탭1] 책처럼 보기 렌더링 **/
+        function renderBookPreviews() {
+            const container = $('#book-previews').empty();
+            bookPages.forEach((src, idx) => {
+                container.append(`
+                    <div class="preview-item">
+                        <img src="${src}">
+                        <button class="remove-pg" onclick="removeBookPage(${idx})">×</button>
+                    </div>
+                `);
+            });
+            $('#book-controls').toggle(bookPages.length > 0);
+        }
+
+        function removeBookPage(i) {
+            bookPages.splice(i, 1);
+            renderBookPreviews();
+        }
+
+        /** [탭2] PDF 편집 렌더링 **/
+        async function renderEditGrid() {
+            const grid = $('#edit-grid').empty();
+            for (let i = 0; i < editPages.length; i++) {
+                const p = editPages[i];
+                const card = $(`
+                    <div class="page-card ${p.sel ? 'selected' : ''}" data-idx="${i}" onclick="toggleSelect(${i}, event)">
+                        <div class="page-thumb" id="thumb-${i}">⏳</div>
+                        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold;">
+                            <span>Page ${i+1}</span>
+                            <span>${p.rot}°</span>
+                        </div>
+                    </div>
+                `);
+                grid.append(card);
+                renderThumbToCard(p, i);
             }
         }
 
-        function renderThumbnails() {
-            const container = document.getElementById('preview-container');
-            container.innerHTML = '';
-            pageImages.forEach((dataUrl, index) => {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                div.innerHTML = `
-                    <img src="${dataUrl}">
-                    <div class="page-num">${index + 1}</div>
-                    <button class="remove-btn" onclick="removePage(${index})" title="삭제">×</button>
-                `;
-                container.appendChild(div);
-            });
-
-            document.getElementById('start-btn-container').style.display = pageImages.length > 0 ? 'block' : 'none';
-        }
-
-        function removePage(index) {
-            pageImages.splice(index, 1);
-            renderThumbnails();
-        }
-
-        // --- 뷰어 실행 로직 (전체화면 덮기 및 무한 로딩/비율 해결) ---
-        async function startFlipbook() {
-            if (pageImages.length === 0) return;
-            document.getElementById('viewer-screen').style.display = 'flex';
-            showLoading("책을 펼치는 중입니다...");
-
-            // DOM 렌더링을 위해 잠깐 쉼
-            setTimeout(() => {
-                initFlipbook();
-                hideLoading();
-            }, 100);
-        }
-
-        function exitViewer() {
-            clearAll(); // 화면을 벗어나면 모든 캐시/업로드 흔적 일괄 삭제
-        }
-
-        function clearAll() {
-            pageImages = [];
-            document.getElementById('preview-container').innerHTML = '';
-            document.getElementById('file-input').value = '';
-            document.getElementById('start-btn-container').style.display = 'none';
-            document.getElementById('viewer-screen').style.display = 'none'; // 뷰어 닫기
-
-            if (flipbookInitialized) {
-                try { $('#flipbook').turn('destroy'); } catch (e) { }
-                flipbookInitialized = false;
-            }
-
-            // Turn.js의 고질적인 DOM 잔류 캐시 충돌 방지를 위해 엘리먼트 자체를 물리적으로 파괴 후 재생성
-            $('#flipbook').remove();
-            $('#book-wrapper').prepend('<div id="flipbook"></div>');
-        }
-
-        function initFlipbook() {
-            const flipbook = $('#flipbook');
-            if (flipbookInitialized) flipbook.turn('destroy');
-            flipbook.empty();
-
-            // 가로 또는 세로에 따라 화면에 최대 100% 꽉 차게 계산 (원본 이미지 비율을 고정하지 않음)
-            const finalW = window.innerWidth;
-            const finalH = window.innerHeight - 50; // 상단 툴바(50px) 뺀 실제 공간
-
-            // 각 페이지 엘리먼트 돔 생성
-            pageImages.forEach(imgSrc => {
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'book-page';
-                // object-fit: contain CSS 속성 덕분에 이미지 비율 왜곡 및 치우침 방지
-                pageDiv.innerHTML = `<img class="page-image" src="${imgSrc}">`;
-                flipbook.append(pageDiv);
-            });
-
-            flipbook.css('display', 'block');
-
+        async function renderThumbToCard(p, i) {
             try {
-                flipbook.turn({
-                    width: finalW,
-                    height: finalH,
-                    display: 'single',
-                    autoCenter: true,
-                    duration: 600,
-                    elevation: 50,
-                    pages: pageImages.length
-                });
-                flipbookInitialized = true;
-            } catch (e) {
-                console.error("Turn.js Initialization Error :", e);
-            }
+                const bytes = await p.srcDoc.save();
+                const jd = await pdfjsLib.getDocument({ data: bytes }).promise;
+                const page = await jd.getPage(p.srcIdx + 1);
+                const vp = page.getViewport({ scale: 0.3, rotation: p.rot });
+                const canvas = document.createElement('canvas');
+                canvas.width = vp.width; canvas.height = vp.height;
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                $(`#thumb-${i}`).empty().append(canvas);
+            } catch (e) { $(`#thumb-${i}`).text("Error"); }
         }
 
-        function turnHome() { if (flipbookInitialized) $('#flipbook').turn('page', 1); }
-        function turnPrev() {
-            if (!flipbookInitialized) return;
-            const fb = $('#flipbook');
-            if (fb.turn('page') > 1) fb.turn('previous');
-            else fb.turn('page', fb.turn('pages'));
+        function toggleSelect(i, e) {
+            editPages[i].sel = !editPages[i].sel;
+            renderEditGrid();
         }
-        function turnNext() {
-            if (!flipbookInitialized) return;
-            const fb = $('#flipbook');
-            if (fb.turn('page') < fb.turn('pages')) fb.turn('next');
-            else fb.turn('page', 1);
-        }
-        function turnLast() { if (flipbookInitialized) $('#flipbook').turn('page', $('#flipbook').turn('pages')); }
 
-        // 브라우저 크기 변경 대응
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            if (flipbookInitialized && document.getElementById('viewer-screen').style.display !== 'none') {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    initFlipbook();
-                }, 200);
-            }
-        });
-
-        // --- 다운로드 & 모달 ---
-        async function downloadPDF() {
-            if (pageImages.length === 0) return;
-            showLoading("파일을 PDF로 저장 중입니다...");
-            const { jsPDF } = window.jspdf;
-
-            // 첫 번째 이미지를 기준으로 문서 생성
-            const tempImg = new Image();
-            tempImg.src = pageImages[0];
-            await new Promise(r => tempImg.onload = r);
-
-            const orientation = tempImg.width > tempImg.height ? 'l' : 'p';
-            const pdf = new jsPDF({
-                orientation: orientation,
-                unit: 'px',
-                format: [tempImg.width, tempImg.height]
-            });
-
-            pdf.addImage(pageImages[0], 'JPEG', 0, 0, tempImg.width, tempImg.height);
-
-            // 2번째 이미지부터 가로/세로 오리지널 비율에 맞춰서 페이지 추가
-            for (let i = 1; i < pageImages.length; i++) {
-                const img = new Image();
-                img.src = pageImages[i];
-                await new Promise(r => img.onload = r);
-
-                const iterOrientation = img.width > img.height ? 'l' : 'p';
-                pdf.addPage([img.width, img.height], iterOrientation);
-                pdf.addImage(pageImages[i], 'JPEG', 0, 0, img.width, img.height);
+        /** 편집 액션 **/
+        function editAction(type) {
+            const selected = editPages.filter(p => p.sel);
+            if (type !== 'selectAll' && type !== 'selectNone' && selected.length === 0) {
+                alert("선택된 페이지가 없습니다."); return;
             }
 
-            pdf.save("download.pdf");
+            switch(type) {
+                case 'selectAll': editPages.forEach(p => p.sel = true); break;
+                case 'selectNone': editPages.forEach(p => p.sel = false); break;
+                case 'delete': editPages = editPages.filter(p => !p.sel); break;
+                case 'rotate': editPages.forEach(p => { if(p.sel) p.rot = (p.rot + 90) % 360; }); break;
+                case 'copy': 
+                    const copies = selected.map(p => ({...p, sel: false}));
+                    editPages.push(...copies);
+                    break;
+                case 'moveUp':
+                    for (let i = 1; i < editPages.length; i++) {
+                        if (editPages[i].sel && !editPages[i-1].sel) {
+                            [editPages[i], editPages[i-1]] = [editPages[i-1], editPages[i]];
+                        }
+                    }
+                    break;
+                case 'moveDown':
+                    for (let i = editPages.length - 2; i >= 0; i--) {
+                        if (editPages[i].sel && !editPages[i+1].sel) {
+                            [editPages[i], editPages[i+1]] = [editPages[i+1], editPages[i]];
+                        }
+                    }
+                    break;
+            }
+            renderEditGrid();
+        }
+
+        async function insertPdf(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            showLoading("삽입할 PDF 분석 중...");
+            const libDoc = await PDFLib.PDFDocument.load(await file.arrayBuffer());
+            for (let i = 0; i < libDoc.getPageCount(); i++) {
+                editPages.push({ srcDoc: libDoc, srcIdx: i, rot: 0, sel: false });
+            }
+            renderEditGrid();
             hideLoading();
         }
 
-        function openShareModal() { document.getElementById('share-modal').style.display = 'flex'; }
-        function closeShareModal() { document.getElementById('share-modal').style.display = 'none'; }
+        /** Flipbook 제어 **/
+        function startFlipbook() {
+            if (bookPages.length === 0) return;
+            $('#viewer-overlay').css('display', 'flex');
+            showLoading("책을 제본하는 중입니다...");
+            
+            setTimeout(() => {
+                const fb = $('#flipbook');
+                if (fb.data().turn) fb.turn('destroy');
+                fb.empty();
 
-        async function shareSocial(platform) {
-            closeShareModal();
-            if (navigator.share && (platform === 'kakao' || platform === 'link')) {
-                try {
-                    showLoading("공유 파일 준비 중...");
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'px', [800, 1000]);
-                    pdf.addImage(pageImages[0], 'JPEG', 0, 0, 800, 1000);
-                    const file = new File([pdf.output('blob')], "Storybook.pdf", { type: "application/pdf" });
-                    hideLoading();
-                    await navigator.share({ title: '마법의 스토리북', text: '[스토리북 뷰어] 나의 그림책을 확인해보세요!', files: [file] });
-                    return;
-                } catch (err) {
-                    hideLoading(); console.log("기본 공유 에러", err);
+                bookPages.forEach(src => {
+                    fb.append(`<div class="book-page"><img src="${src}" style="width:100%; height:100%; object-fit:contain;"></div>`);
+                });
+
+                fb.turn({
+                    width: window.innerWidth * 0.9,
+                    height: window.innerHeight - 150,
+                    autoCenter: true,
+                    display: 'single',
+                    acceleration: true
+                });
+                hideLoading();
+            }, 500);
+        }
+
+        function turn(dir) {
+            const fb = $('#flipbook');
+            if (dir === 'prev') fb.turn('previous');
+            else if (dir === 'next') fb.turn('next');
+            else if (dir === 'first') fb.turn('page', 1);
+            else if (dir === 'last') fb.turn('page', fb.turn('pages'));
+        }
+
+        function closeViewer() { $('#viewer-overlay').hide(); }
+
+        /** 저장 및 다운로드 **/
+        async function downloadBook() {
+            showLoading("PDF 생성 중...");
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            for (let i = 0; i < bookPages.length; i++) {
+                if (i > 0) pdf.addPage();
+                pdf.addImage(bookPages[i], 'JPEG', 0, 0, 210, 297);
+            }
+            pdf.save("HanAI_Storybook.pdf");
+            hideLoading();
+        }
+
+        function showSaveDlg() {
+            $('#out-filename').val("Edited_Result");
+            $('#save-dlg').css('display', 'flex');
+        }
+
+        async function performSave() {
+            $('#save-dlg').hide();
+            showLoading("고품질 PDF로 병합 중...");
+            try {
+                const outDoc = await PDFLib.PDFDocument.create();
+                for (const p of editPages) {
+                    const [copiedPage] = await outDoc.copyPages(p.srcDoc, [p.srcIdx]);
+                    if (p.rot !== 0) copiedPage.setRotation(PDFLib.degrees(p.rot));
+                    outDoc.addPage(copiedPage);
                 }
-            }
-            if (platform === 'kakao') alert("💚 PC 환경 카카오톡 공유 안내:\n\n우선 상단의 [⬇️ PDF 다운로드] 버튼을 눌러 피씨에 저장하신 후, 저장된 파일을 카카오톡 채팅창에 쓱 드래그해서 보내시면 가장 완벽하게 전송됩니다!");
-            else if (platform === 'insta' || platform === 'youtube') alert(`📸 ${platform === 'insta' ? '인스타그램' : '유튜브'} 공유 모드: \n\n현재 화면을 캡처하시거나, 다운로드된 PDF를 앱을 통해 업로드해주시면 됩니다. (SNS는 PDF 직접업로드를 미지원합니다)`);
-            else if (platform === 'link') alert("🔗 링크 복사 모드:\n\n본 시스템은 PC 독립 웹앱입니다. 이 'pdf edit.html' 파일 자체를 이메일이나 메신저로 전달해 주시면 됩니다!");
+                const bytes = await outDoc.save();
+                const blob = new Blob([bytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = $('#out-filename').val() + ".pdf";
+                a.click();
+            } catch (e) { alert("저장 실패: " + e.message); }
+            hideLoading();
         }
 
-        function showLoading(msg) { document.getElementById('loading-msg').innerText = msg; document.getElementById('global-loading').style.display = 'flex'; }
-        function hideLoading() { document.getElementById('global-loading').style.display = 'none'; }
-
-        // --- 전체화면 (Full Screen) 제어 ---
+        /** 유틸리티 **/
+        function showLoading(txt) { $('#loading-txt').text(txt); $('#loading').css('display', 'flex'); }
+        function hideLoading() { $('#loading').hide(); }
+        function resetApp(type) { if(confirm("초기화하시겠습니까?")) location.reload(); }
         function toggleFullScreen() {
-            const doc = window.document;
-            const docEl = doc.documentElement;
-
-            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-                requestFullScreen.call(docEl);
-            }
-            else {
-                cancelFullScreen.call(doc);
-            }
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
         }
+
+        // 보안 설정 (우클릭 및 개발자도구 방지)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+                e.preventDefault();
+                alert("HanAI 보안 정책에 따라 개발자 도구를 열 수 없습니다.");
+            }
+        });
     </script>
 </body>
-
 </html>
