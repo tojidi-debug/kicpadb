@@ -15,51 +15,42 @@
             font-size: 20pt; color: white; text-decoration: none;
             border-radius: 15px; cursor: pointer; border: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s;
+            text-align: center; line-height: 1.2;
         }
-        /* 심사DB 버튼: 진한 파란색 */
         .btn-review { background-color: #1e3a8a; }
-        .btn-review:hover { background-color: #1e40af; opacity: 0.9; }
-        
-        /* 감리DB 버튼: 진한 남색 */
+        .btn-review:hover { background-color: #1e40af; }
         .btn-inspection { background-color: navy; }
-        .btn-inspection:hover { background-color: #000050; opacity: 0.9; }
-
+        .btn-inspection:hover { background-color: #000050; }
         .small-text { font-size: 8pt; vertical-align: middle; }
-        .guide { margin-top: 20px; color: #555; font-size: 11pt; line-height: 1.6; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button class="btn btn-review" onclick="copyAndOpen('C:/Users/KICPA/JYLIM/work/DB조회/심사DB/review_final.html')">
+    <button class="btn btn-review" onclick="processDB('file:///C:/Users/KICPA/JYLIM/work/DB조회/심사DB/review_final.html')">
         심사조치안 <span class="small-text">(내 컴퓨터내)</span> DB 폴더 열기
     </button>
 
-    <button class="btn btn-inspection" onclick="copyAndOpen('C:/Users/KICPA/JYLIM/work/DB조회/감리DB/inspection_final.html')">
+    <button class="btn btn-inspection" onclick="processDB('file:///C:/Users/KICPA/JYLIM/work/DB조회/감리DB/inspection_final.html')">
         감리조치안 <span class="small-text">(내 컴퓨터내)</span> DB 폴더 열기
     </button>
-
-    <div class="guide">
-        <strong>[사용 방법]</strong><br>
-        1. 위 버튼을 클릭하면 경로가 자동으로 복사됩니다.<br>
-        2. 새로 뜨는 <strong>'DB' 창의 주소창</strong>을 클릭한 뒤,<br>
-        3. <strong>Ctrl + V</strong> (붙여넣기) 후 <strong>Enter</strong>를 누르면 파일이 열립니다.
-    </div>
 </div>
 
 <script>
-    function copyAndOpen(path) {
-        // 1. 클립보드에 경로 복사 (file:/// 형식 포함)
-        const fullPath = "file:///" + path;
-        navigator.clipboard.writeText(fullPath).then(function() {
-            alert("경로가 복사되었습니다!\n새로 열린 창의 주소창에 'Ctrl+V' 후 'Enter'를 눌러주세요.");
-            
-            // 2. "DB"라는 이름의 새 창 열기
-            window.open('about:blank', 'DB');
-        }).catch(function(err) {
-            console.error('복사 실패:', err);
-            alert("자동 복사에 실패했습니다. 주소창에 직접 입력이 필요할 수 있습니다.");
-        });
+    function processDB(fullPath) {
+        // 1. 클립보드에 주소 복사 (사용자가 혹시 몰라 붙여넣을 수 있도록 대비)
+        navigator.clipboard.writeText(fullPath);
+
+        // 2. 사용자에게 안내 메시지 출력 (확인만 누르면 됨)
+        const userAction = confirm("보안상 바로 열 수 없습니다.\n\n[방법]\n확인을 누른 후, 'DB' 창의 주소창에서 Ctrl+V를 눌러주세요.\n(브라우저 정책상 자동 입력은 불가능합니다.)");
+        
+        if (userAction) {
+            // 3. 'DB'라는 이름의 새 탭을 열고 포커스
+            const dbWin = window.open('about:blank', 'DB');
+            if (dbWin) {
+                dbWin.focus();
+            }
+        }
     }
 </script>
 
