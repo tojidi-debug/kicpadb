@@ -12,40 +12,24 @@
     }
     body, html { width: 100%; height: 100%; font-family: 'Nanum Gothic', sans-serif; background: #000; overflow-x: hidden; }
 
-    /* 1. 로그인 화면 (우주 배경) */
-    #login-screen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;
+    /* 우주 배경 고정 */
+    .bg-fixed {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
       background: radial-gradient(ellipse at top, #1a237e 0%, #0a0e27 50%), radial-gradient(ellipse at bottom, #0d1b3e 0%, #000000 100%);
-      display: flex; justify-content: center; align-items: center;
     }
     .stars { position: absolute; width: 100%; height: 100%; pointer-events: none; }
     .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; }
-    
-    .container-box {
-      position: relative; background: rgba(13, 27, 62, 0.95); backdrop-filter: blur(20px);
-      padding: 50px 40px; border-radius: 20px; border: 1px solid rgba(28,181,224,0.5);
-      width: 400px; text-align: center; display: none;
-    }
-    .container-box.active { display: block; }
-    .logo-text { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 10px; }
-    .input-group input { 
-      width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; 
-      border: 1px solid rgba(28,181,224,0.3); background: rgba(255,255,255,0.1); color: #fff; 
-      user-select: text; outline: none;
-    }
-    .login-btn { 
-      width: 100%; padding: 14px; border: none; border-radius: 8px; 
-      background: linear-gradient(135deg, #1cb5e0, #5b86e5); color: #fff; font-weight: 600; cursor: pointer; 
-    }
 
-    /* 2. 메인 콘텐츠 화면 */
+    /* 메인 콘텐츠 화면 */
     #main-content {
-      display: none; min-height: 100vh; background: #f4f4f4; padding: 20px;
+      min-height: 100vh; padding: 20px; position: relative; z-index: 1;
     }
     .top-bar {
       max-width: 1200px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center;
-      background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+      padding: 15px 25px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2);
     }
+    .top-bar h2 { color: #fff; text-shadow: 0 0 10px rgba(28, 181, 224, 0.8); }
     .btn-group { display: flex; gap: 10px; }
     .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .btn-save { background: #1cb5e0; color: white; }
@@ -57,28 +41,31 @@
       display: grid; grid-template-columns: 1fr 1fr; gap: 25px; max-width: 1200px; margin: 0 auto;
     }
 
-    /* 포스트잇 스타일 카드 */
+    /* 포스트잇 스타일 카드 (투명도 조정) */
     .post-it {
-      position: relative; min-height: 380px; border-radius: 2px;
-      box-shadow: 5px 5px 15px rgba(0,0,0,0.12); display: flex; flex-direction: column;
+      position: relative; min-height: 380px; border-radius: 4px;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;
       transition: transform 0.2s; cursor: default; overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px); /* 배경이 살짝 비치도록 함 */
     }
     .post-it:hover { transform: translateY(-5px); }
     
-    /* 색상 클래스 */
-    .bg-yellow { background-color: #fff9c4; }
-    .bg-blue   { background-color: #e3f2fd; }
-    .bg-purple { background-color: #f3e5f5; }
-    .bg-orange { background-color: #fff3e0; }
+    /* 투명도 40% 적용된 파스텔 색상 */
+    .bg-yellow { background-color: rgba(255, 249, 196, 0.4); } /* 연노랑 */
+    .bg-blue   { background-color: rgba(227, 242, 253, 0.4); } /* 연하늘 */
+    .bg-purple { background-color: rgba(243, 229, 245, 0.4); } /* 연보라 */
+    .bg-orange { background-color: rgba(255, 243, 224, 0.4); } /* 연주황 */
 
     .upload-area {
       flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #666; cursor: pointer; padding: 20px; text-align: center;
+      color: #fff; cursor: pointer; padding: 20px; text-align: center;
     }
+    .upload-area p { margin-top: 10px; font-size: 14px; color: rgba(255, 255, 255, 0.8); }
     .display-img { width: 100%; height: auto; display: block; }
     
     .remove-btn {
-      position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); color: white;
+      position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white;
       border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px;
       display: none; z-index: 5;
     }
@@ -88,27 +75,13 @@
 </head>
 <body oncontextmenu="return false">
 
-  <div id="login-screen">
+  <div class="bg-fixed">
     <div class="stars" id="starField"></div>
-    <div class="container-box active" id="loginBox">
-      <div class="logo-text">㈜한에스시스템</div>
-      <p style="color:rgba(255,255,255,0.7); margin-bottom:25px;">[V1.0] 이미지 보드</p>
-      <form onsubmit="handleLogin(event)">
-        <div class="input-group">
-          <input type="email" id="userEmail" placeholder="등록된 이메일을 입력하세요" required>
-        </div>
-        <button type="submit" class="login-btn">접속하기</button>
-      </form>
-    </div>
-    <div class="container-box" id="loadingBox">
-      <div class="logo-text" style="color:#4facfe;">인증 확인됨</div>
-      <p style="color:#fff;">데이터를 불러오는 중입니다...</p>
-    </div>
   </div>
 
   <div id="main-content">
     <div class="top-bar">
-      <h2 style="color:#333;">📌 Image Clipboard</h2>
+      <h2>㈜한에스시스템 Image Board</h2>
       <div class="btn-group">
         <button class="btn btn-save" onclick="saveToLocal()">Save (Ctrl+S)</button>
         <button class="btn btn-clear" onclick="clearBoard()">Clear All</button>
@@ -118,12 +91,6 @@
   </div>
 
   <script>
-    // 허용 이메일 및 초기 설정
-    const ALLOWED_EMAILS = [
-      'tojidi@gmail.com', 'kjloveh8@gmail.com', 'wony93680@gmail.com', 
-      'jesussw0410@gmail.com', 'juhlee0420@gmail.com', 'ohdass12@gmail.com', 
-      'kkysky87@gmail.com', 'purityma1@gmail.com'
-    ];
     let boardItems = ["", "", "", ""]; // 초기 4개 슬롯
     const colors = ['bg-yellow', 'bg-blue', 'bg-purple', 'bg-orange'];
 
@@ -140,28 +107,6 @@
       }
     }
 
-    // 로그인 로직
-    function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('userEmail').value.trim().toLowerCase();
-      if(ALLOWED_EMAILS.includes(email)) {
-        localStorage.setItem('verified_user', email);
-        document.getElementById('loginBox').classList.remove('active');
-        document.getElementById('loadingBox').classList.add('active');
-        setTimeout(showMain, 1000);
-      } else {
-        alert("등록되지 않은 사용자입니다.");
-      }
-    }
-
-    function showMain() {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('main-content').style.display = 'block';
-      const saved = localStorage.getItem('h_system_images');
-      if(saved) boardItems = JSON.parse(saved);
-      renderBoard();
-    }
-
     // 보드 렌더링
     function renderBoard() {
       const grid = document.getElementById('imageGrid');
@@ -175,14 +120,13 @@
           <button class="remove-btn" onclick="deleteItem(${idx})">✕</button>
           ${src ? `<img src="${src}" class="display-img">` : `
             <div class="upload-area" onclick="document.getElementById('file-${idx}').click()" ondrop="dropFile(event, ${idx})" ondragover="return false">
-              <span style="font-size:40px; margin-bottom:10px;">📌</span>
-              <p>클릭/드래그/붙여넣기<br>하여 이미지 추가</p>
+              <span style="font-size:40px;">📌</span>
+              <p>이미지를 클릭/드래그/붙여넣기 하세요</p>
             </div>
           `}
           <input type="file" id="file-${idx}" class="file-input" accept="image/*" onchange="inputFile(this, ${idx})">
         `;
         
-        // 붙여넣기 이벤트 바인딩
         card.tabIndex = 0;
         card.addEventListener('paste', (e) => handlePaste(e, idx));
         grid.appendChild(card);
@@ -217,7 +161,7 @@
 
     function saveToLocal() {
       localStorage.setItem('h_system_images', JSON.stringify(boardItems));
-      alert("보드 상태가 저장되었습니다.");
+      alert("보드가 성공적으로 저장되었습니다.");
     }
 
     function clearBoard() {
@@ -228,23 +172,24 @@
       }
     }
 
-    // 초기 실행 및 단축키
+    // 초기 실행 및 데이터 로드
     window.onload = () => {
       initStars();
-      const session = localStorage.getItem('verified_user');
-      if(session && ALLOWED_EMAILS.includes(session)) showMain();
+      const saved = localStorage.getItem('h_system_images');
+      if(saved) boardItems = JSON.parse(saved);
+      renderBoard();
     };
 
+    // 단축키 설정
     window.addEventListener('keydown', (e) => {
       if((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         saveToLocal();
       }
-    });
-
-    // 보안: F12 및 우클릭 제한
-    document.addEventListener('keydown', e => {
-      if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) e.preventDefault();
+      // F12 차단
+      if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
+        e.preventDefault();
+      }
     });
   </script>
 </body>
