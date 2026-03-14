@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한에스시스템 - 이미지 보드</title>
+  <style>
+    /* 기본 초기화 */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+    }
+    body, html { width: 100%; height: 100%; overflow: hidden; font-family: 'Nanum Gothic', sans-serif; background: #000; }
+
+    /* ========================================
+       1. 로그인 화면 스타일 (기존 스타일 유지)
+       ======================================== */
+    #login-screen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000;
+      background: radial-gradient(ellipse at top, #1a237e 0%, #0a0e27 50%), radial-gradient(ellipse at bottom, #0d1b3e 0%, #000000 100%);
+    }
+    .space-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(2px 2px at 20% 30%, white, transparent), radial-gradient(2px 2px at 60% 70%, white, transparent); background-size: 200% 200%; opacity: 0.6; pointer-events: none; }
+    .stars { position: absolute; width: 100%; height: 100%; pointer-events: none; }
+    .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; box-shadow: 0 0 4px rgba(255, 255, 255, 0.8); }
+    .container-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(13, 27, 62, 0.95); backdrop-filter: blur(20px); padding: 50px 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid rgba(28,181,224,0.5); width: 400px; text-align: center; display: none; }
+    .container-box.active { display: block; }
+    .logo-text { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 5px; }
+    .input-group input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid rgba(28,181,224,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: #fff; user-select: text; }
+    .login-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; background: linear-gradient(135deg, #1cb5e0, #5b86e5); color: #fff; font-weight: 600; cursor: pointer; }
+
+    /* ========================================
+       2. 이미지 보드 메인 콘텐츠 스타일
+       ======================================== */
+    #main-content {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: none; background: #f0f2f5; overflow-y: auto; padding: 20px;
+    }
+    
+    /* 상단 컨트롤 바 */
+    .controls {
+      max-width: 1200px; margin: 0 auto 20px; display: flex; justify-content: space-between; align-items: center;
+      background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn-group { display: flex; gap: 10px; }
+    .action-btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .save-btn { background: #1cb5e0; color: white; }
+    .clear-btn { background: #ff6b6b; color: white; }
+    .action-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
+    /* 이미지 그리드 (한 줄에 2개) */
+    .image-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto;
+    }
+
+    /* 이미지 카드 섹션 */
+    .image-card {
+      background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; min-height: 300px; border: 2px dashed #ccc; position: relative;
+    }
+    .image-card.has-image { border: none; }
+    
+    /* 업로드 영역 */
+    .upload-placeholder {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #888; cursor: pointer; transition: 0.3s; padding: 20px; text-align: center;
+    }
+    .upload-placeholder:hover { background: #f8f9fa; color: #1cb5e0; }
+    
+    /* 실제 표시되는 이미지 */
+    .display-img {
+      width: 100%; height: auto; display: none; object-fit: contain;
+    }
+    .image-card.has-image .display-img { display: block; }
+    .image-card.has-image .upload-placeholder { display: none; }
+
+    /* 개별 삭제 버튼 */
+    .remove-img {
+      position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white;
+      border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: none;
+    }
+    .image-card.has-image:hover .remove-img { display: block; }
+
+    /* 숨겨진 파일 인풋 */
+    .file-input { display: none; }
+  </style>
+</head>
+<body oncontextmenu="return false">
+
+  <div id="login-screen">
+    <div class="space-bg"></div><div class="stars" id="stars"></div>
+    <div class="container-box" id="loginContainer">
+      <div class="logo-text">㈜한에스시스템</div>
+      <div class="info-text" style="color:#fff; margin-bottom:20px;">접속을 위해 이메일을 입력하세요</div>
+      <form onsubmit="checkEmail(event)">
+        <div class="input-group"><input type="email" id="email" placeholder="example@email.com" required></div>
+        <button type="submit" class="login-btn" id="loginBtn">확인</button>
+      </form>
+    </div>
+    <div class="container-box" id="welcomeContainer">
+      <div class="info-text" style="font-size: 20px; color: #4facfe;">인증 성공</div>
+      <div class="info-text" style="color:#fff;">보드를 불러오는 중...</div>
+    </div>
+  </div>
+
+  <div id="main-content">
+    <div class="controls">
+      <h2 style="color: #333;">📷 Image Dashboard</h2>
+      <div class="btn-group">
+        <button class="action-btn save-btn" onclick="saveData()">Save (Ctrl+S)</button>
+        <button class="action-btn clear-btn" onclick="clearAllData()">Clear Board</button>
+      </div>
+    </div>
+
+    <div class="image-grid" id="imageGrid">
+      </div>
+  </div>
+
+  <script>
+    const ALLOWED_EMAILS = ['tojidi@gmail.com', 'kjloveh8@gmail.com', 'wony93680@gmail.com', 'jesussw0410@gmail.com', 'juhlee0420@gmail.com', 'ohdass12@gmail.com', 'kkysky87@gmail.com', 'purityma1@gmail.com'];
+    let imageData = ["", "", "", ""]; // 초기 4개 슬롯
+
+    // 별 배경 생성
+    function createStars() {
+      const c = document.getElementById('stars');
+      for(let i=0; i<80; i++){
+        let s = document.createElement('div'); s.className = 'star';
+        s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
+        c.appendChild(s);
+      }
+    }
+
+    window.onload = () => {
+      createStars();
+      const savedEmail = localStorage.getItem('myVerifiedEmail');
+      if (savedEmail && ALLOWED_EMAILS.includes(savedEmail)) {
+        loadBoard();
+      } else {
+        document.getElementById('loginContainer').classList.add('active');
+      }
+    };
+
+    function checkEmail(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      if (ALLOWED_EMAILS.includes(email)) {
+        localStorage.setItem('myVerifiedEmail', email);
+        document.getElementById('loginContainer').classList.remove('active');
+        document.getElementById('welcomeContainer').classList.add('active');
+        setTimeout(loadBoard, 1200);
+      } else {
+        alert("접근 권한이 없습니다.");
+      }
+    }
+
+    // 보드 초기화 및 렌더링
+    function loadBoard() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+      
+      const savedBoard = localStorage.getItem('board_images');
+      if(savedBoard) imageData = JSON.parse(savedBoard);
+      
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('imageGrid');
+      grid.innerHTML = '';
+      
+      imageData.forEach((src, index) => {
+        const card = document.createElement('div');
+        card.className = `image-card ${src ? 'has-image' : ''}`;
+        card.innerHTML = `
+          <button class="remove-img" onclick="deleteImage(${index})">✕</button>
+          <div class="upload-placeholder" onclick="triggerInput(${index})" 
+               ondrop="handleDrop(event, ${index})" ondragover="return false">
+            <span style="font-size:30px;">+</span>
+            <p>클릭하여 업로드하거나<br>이미지를 여기에 드래그/붙여넣기 하세요</p>
+          </div>
+          <img src="${src}" class="display-img" id="img-${index}">
+          <input type="file" id="file-${index}" class="file-input" accept="image/*" onchange="handleFile(this, ${index})">
+        `;
+        
+        // 붙여넣기 이벤트 감지 (선택된 카드 기준)
+        card.tabIndex = 0; // 포커스 가능하게 설정
+        card.addEventListener('paste', (e) => handlePaste(e, index));
+        
+        grid.appendChild(card);
+      });
+    }
+
+    function triggerInput(index) {
+      document.getElementById(`file-${index}`).click();
+    }
+
+    // 파일 처리 공통 함수
+    function processFile(file, index) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imageData[index] = e.target.result;
+        // 슬롯이 꽉 차면 자동으로 하나 더 생성 (선택 사항)
+        if(index === imageData.length - 1) imageData.push(""); 
+        renderGrid();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleFile(input, index) {
+      processFile(input.files[0], index);
+    }
+
+    function handleDrop(e, index) {
+      e.preventDefault();
+      processFile(e.dataTransfer.files[0], index);
+    }
+
+    function handlePaste(e, index) {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (let item of items) {
+        if (item.type.indexOf("image") !== -1) {
+          processFile(item.getAsFile(), index);
+        }
+      }
+    }
+
+    function deleteImage(index) {
+      imageData[index] = "";
+      renderGrid();
+    }
+
+    function saveData() {
+      localStorage.setItem('board_images', JSON.stringify(imageData));
+      alert("데이터가 안전하게 저장되었습니다.");
+    }
+
+    function clearAllData() {
+      if (confirm("모든 데이터를 지울까요?")) {
+        imageData = ["", "", "", ""];
+        localStorage.removeItem('board_images');
+        renderGrid();
+      }
+    }
+
+    // 단축키 설정
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveData();
+      }
+    });
+
+  </script>
+</body>
+</html>
