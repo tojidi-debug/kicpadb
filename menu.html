@@ -10,63 +10,69 @@
       margin: 0; padding: 0; box-sizing: border-box;
       -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
     }
-    body, html { width: 100%; height: 100%; font-family: 'Nanum Gothic', sans-serif; background: #000; overflow-x: hidden; }
-
-    /* 우주 배경 고정 */
-    .bg-fixed {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-      background: radial-gradient(ellipse at top, #1a237e 0%, #0a0e27 50%), radial-gradient(ellipse at bottom, #0d1b3e 0%, #000000 100%);
+    
+    /* 전체 글씨 크기 2pt 축소 (기본 16px -> 13.3px 내외) */
+    body, html { 
+      width: 100%; height: 100%; 
+      font-family: 'Nanum Gothic', sans-serif; 
+      background: linear-gradient(135deg, #ffffff 0%, #eef7ff 100%); /* 화이트 + 연하늘 그라데이션 */
+      font-size: 13.3px; 
     }
-    .stars { position: absolute; width: 100%; height: 100%; pointer-events: none; }
-    .star { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; }
 
     /* 메인 콘텐츠 화면 */
     #main-content {
-      min-height: 100vh; padding: 20px; position: relative; z-index: 1;
+      min-height: 100vh; padding: 20px;
     }
+    
     .top-bar {
       max-width: 1200px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center;
-      background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
-      padding: 15px 25px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);
+      padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
-    .top-bar h2 { color: #fff; text-shadow: 0 0 10px rgba(28, 181, 224, 0.8); }
-    .btn-group { display: flex; gap: 10px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    
+    .top-bar h2 { color: #333; font-size: 1.2rem; }
+    
+    .btn-group { display: flex; gap: 8px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; }
     .btn-save { background: #1cb5e0; color: white; }
     .btn-clear { background: #ff6b6b; color: white; }
     .btn:hover { opacity: 0.8; transform: translateY(-1px); }
 
     /* 이미지 그리드 (2열 배치) */
     .image-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 25px; max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto;
     }
 
-    /* 포스트잇 스타일 카드 (투명도 조정) */
+    /* 아주 연한 포스트잇 스타일 카드 */
     .post-it {
-      position: relative; min-height: 380px; border-radius: 4px;
-      box-shadow: 5px 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+      position: relative; min-height: 350px; border-radius: 4px;
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column;
       transition: transform 0.2s; cursor: default; overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px); /* 배경이 살짝 비치도록 함 */
+      border: 1px solid rgba(0, 0, 0, 0.03);
     }
-    .post-it:hover { transform: translateY(-5px); }
+    .post-it:hover { transform: translateY(-3px); }
     
-    /* 투명도 40% 적용된 파스텔 색상 */
-    .bg-yellow { background-color: rgba(255, 249, 196, 0.4); } /* 연노랑 */
-    .bg-blue   { background-color: rgba(227, 242, 253, 0.4); } /* 연하늘 */
-    .bg-purple { background-color: rgba(243, 229, 245, 0.4); } /* 연보라 */
-    .bg-orange { background-color: rgba(255, 243, 224, 0.4); } /* 연주황 */
+    /* 아주 연한 파스텔 색상 (투명도 대폭 강화) */
+    .bg-yellow { background-color: rgba(255, 253, 230, 0.6); } /* 아주 연한 노랑 */
+    .bg-blue   { background-color: rgba(240, 248, 255, 0.6); } /* 아주 연한 하늘 */
+    .bg-purple { background-color: rgba(250, 240, 255, 0.6); } /* 아주 연한 보라 */
+    .bg-orange { background-color: rgba(255, 247, 235, 0.6); } /* 아주 연한 주황 */
 
     .upload-area {
       flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #fff; cursor: pointer; padding: 20px; text-align: center;
+      color: #777; cursor: pointer; padding: 20px; text-align: center;
     }
-    .upload-area p { margin-top: 10px; font-size: 14px; color: rgba(255, 255, 255, 0.8); }
+    
+    /* 핀 이모지 크기 축소 */
+    .pin-icon { font-size: 24px; margin-bottom: 8px; }
+    .upload-area p { font-size: 11px; line-height: 1.5; color: #888; }
+    
     .display-img { width: 100%; height: auto; display: block; }
     
     .remove-btn {
-      position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white;
-      border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 14px;
+      position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.2); color: white;
+      border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px;
       display: none; z-index: 5;
     }
     .post-it:hover .remove-btn { display: block; }
@@ -74,10 +80,6 @@
   </style>
 </head>
 <body oncontextmenu="return false">
-
-  <div class="bg-fixed">
-    <div class="stars" id="starField"></div>
-  </div>
 
   <div id="main-content">
     <div class="top-bar">
@@ -91,21 +93,9 @@
   </div>
 
   <script>
-    let boardItems = ["", "", "", ""]; // 초기 4개 슬롯
+    // 초기 4개 슬롯 설정
+    let boardItems = ["", "", "", ""]; 
     const colors = ['bg-yellow', 'bg-blue', 'bg-purple', 'bg-orange'];
-
-    // 배경 별 생성
-    function initStars() {
-      const field = document.getElementById('starField');
-      for(let i=0; i<100; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.opacity = Math.random();
-        field.appendChild(star);
-      }
-    }
 
     // 보드 렌더링
     function renderBoard() {
@@ -120,8 +110,8 @@
           <button class="remove-btn" onclick="deleteItem(${idx})">✕</button>
           ${src ? `<img src="${src}" class="display-img">` : `
             <div class="upload-area" onclick="document.getElementById('file-${idx}').click()" ondrop="dropFile(event, ${idx})" ondragover="return false">
-              <span style="font-size:40px;">📌</span>
-              <p>이미지를 클릭/드래그/붙여넣기 하세요</p>
+              <span class="pin-icon">📌</span>
+              <p>이미지를 클릭하거나<br>드래그/붙여넣기 하세요</p>
             </div>
           `}
           <input type="file" id="file-${idx}" class="file-input" accept="image/*" onchange="inputFile(this, ${idx})">
@@ -133,13 +123,20 @@
       });
     }
 
-    // 이미지 처리 함수
+    // 이미지 처리 (4개가 차면 자동으로 빈 슬롯 추가)
     function processImage(file, idx) {
       if(!file || !file.type.startsWith('image/')) return;
       const reader = new FileReader();
       reader.onload = (e) => {
         boardItems[idx] = e.target.result;
-        if(idx === boardItems.length - 1) boardItems.push(""); // 자동 슬롯 추가
+        
+        // 데이터가 들어있는 항목 수 계산
+        const filledCount = boardItems.filter(item => item !== "").length;
+        // 모든 슬롯이 다 차면 빈 슬롯 2개(한 줄) 추가
+        if (filledCount === boardItems.length) {
+          boardItems.push("", "");
+        }
+        
         renderBoard();
       };
       reader.readAsDataURL(file);
@@ -160,35 +157,30 @@
     }
 
     function saveToLocal() {
-      localStorage.setItem('h_system_images', JSON.stringify(boardItems));
-      alert("보드가 성공적으로 저장되었습니다.");
+      localStorage.setItem('h_system_images_v2', JSON.stringify(boardItems));
+      alert("저장되었습니다.");
     }
 
     function clearBoard() {
       if(confirm("모든 데이터를 지울까요?")) {
         boardItems = ["", "", "", ""];
-        localStorage.removeItem('h_system_images');
+        localStorage.removeItem('h_system_images_v2');
         renderBoard();
       }
     }
 
-    // 초기 실행 및 데이터 로드
     window.onload = () => {
-      initStars();
-      const saved = localStorage.getItem('h_system_images');
-      if(saved) boardItems = JSON.parse(saved);
+      const saved = localStorage.getItem('h_system_images_v2');
+      if(saved) {
+        boardItems = JSON.parse(saved);
+      }
       renderBoard();
     };
 
-    // 단축키 설정
     window.addEventListener('keydown', (e) => {
       if((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         saveToLocal();
-      }
-      // F12 차단
-      if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
-        e.preventDefault();
       }
     });
   </script>
