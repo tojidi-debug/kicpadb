@@ -268,9 +268,22 @@ function escRE(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 let stdByTitle = {};   // title → standardsData 항목
 let tocToTitle = {};   // TOC full title → standardsData 항목 (매핑 결과)
 
+/* 제목 정규화: 로마숫자·공백·구두점 통일 */
+function norm(s) {
+  return s
+    .replace(/Ⅰ/g,'I').replace(/Ⅱ/g,'II').replace(/Ⅲ/g,'III')
+    .replace(/Ⅳ/g,'IV').replace(/Ⅴ/g,'V')
+    .replace(/ⅰ/g,'i').replace(/ⅱ/g,'ii').replace(/ⅲ/g,'iii')
+    .replace(/\s+/g,' ').trim()
+    .toLowerCase();
+}
+
 function buildIndex() {
   stdByTitle = {};
   standardsData.forEach(st => { stdByTitle[st.title] = st; });
+
+  /* 정규화된 standardsData 목록 사전 생성 */
+  const normMap = standardsData.map(st => ({ st, n: norm(st.title) }));
 
   tocToTitle = {};
   TOC.forEach(item => {
@@ -279,25 +292,44 @@ function buildIndex() {
     /* 1순위: 완전 일치 */
     if (stdByTitle[full]) { tocToTitle[full] = stdByTitle[full]; return; }
 
-    /* 2순위: 공백 정규화 후 비교 (예: "1장  목적" vs "1장 목적") */
-    const norm = full.replace(/\s+/g,' ').trim();
-    let found = standardsData.find(s => s.title.replace(/\s+/g,' ').trim() === norm);
-    if (found) { tocToTitle[full] = found; return; }
+    /* 2순위: 정규화 후 완전 일치 (로마숫자·대소문자·공백 무시) */
+    const nFull = norm(full);
+    let found = normMap.find(x => x.n === nFull);
+    if (found) { tocToTitle[full] = found.st; return; }
 
-    /* 3순위: 장번호 제외 name만으로 비교 (예: "목적, 구성 및 적용") */
-    found = standardsData.find(s => {
-      const sn = s.title.replace(/^[\d]+장\s*/,'').trim();
-      return sn === item.name.trim();
+    /* 3순위: 장번호 제거 후 name만 비교 */
+    const nName = norm(item.name);
+    found = normMap.find(x => {
+      const stripped = x.n.replace(/^\d+장\s*/,'').trim();
+      return stripped === nName;
     });
-    if (found) { tocToTitle[full] = found; return; }
+    if (found) { tocToTitle[full] = found.st; return; }
 
-    /* 4순위: standardsData title이 full을 포함하거나 그 반대 */
-    found = standardsData.find(s =>
-      s.title.replace(/\s+/g,'').includes(full.replace(/\s+/g,'')) ||
-      full.replace(/\s+/g,'').includes(s.title.replace(/\s+/g,''))
-    );
-    if (found) { tocToTitle[full] = found; }
+    /* 4순위: 구두점·공백 모두 제거 후 비교 */
+    const flat = s => norm(s).replace(/[\s,·.·]/g,'');
+    const fFull = flat(full);
+    found = normMap.find(x => flat(x.st.title) === fFull);
+    if (found) { tocToTitle[full] = found.st; return; }
+
+    /* 5순위: 포함 관계 (단, 길이가 너무 짧으면 제외) */
+    const fName = flat(item.name);
+    if (fName.length >= 4) {
+      found = normMap.find(x => {
+        const fx = flat(x.st.title);
+        return fx.includes(fFull) || fFull.includes(fx);
+      });
+      if (found) { tocToTitle[full] = found.st; }
+    }
   });
+
+  /* ── 실제 standardsData title 출력 (형식 확인용) ── */
+  console.log('=== standardsData 실제 title 목록 ===');
+  standardsData.forEach((st,i) => console.log(`[${i}] "${st.title}"`));
+
+  const unmatched = TOC
+    .map(item => item.num ? item.num+' '+item.name : item.name)
+    .filter(full => !tocToTitle[full]);
+  if (unmatched.length) console.warn('TOC 미매칭 항목:', unmatched);
 }
 
 /* ── 초기화 ── */
