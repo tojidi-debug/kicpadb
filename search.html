@@ -24,236 +24,200 @@
     --hl:         #fff176;
     --r:          6px;
   }
-
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family: 'Noto Sans KR', 'Nanum Gothic', -apple-system, sans-serif;
-    font-size: 14px;
-    color: var(--text);
-    background: var(--bg);
-    line-height: 1.65;
+    font-family:'Noto Sans KR','Nanum Gothic',-apple-system,sans-serif;
+    font-size:14px; color:var(--text); background:var(--bg); line-height:1.65;
   }
+  ::-webkit-scrollbar { width:7px; height:7px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--sky-border); border-radius:4px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--sky); }
 
-  ::-webkit-scrollbar { width: 7px; height: 7px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--sky-border); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--sky); }
-
-  /* ── 헤더 ── */
+  /* 헤더 */
   .header {
-    background: var(--white);
-    border-bottom: 2px solid var(--sky);
-    padding: 9px 16px;
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    box-shadow: 0 1px 4px rgba(0,0,0,.07);
-    position: sticky; top: 0; z-index: 900;
+    background:var(--white); border-bottom:2px solid var(--sky);
+    padding:9px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    box-shadow:0 1px 4px rgba(0,0,0,.07); position:sticky; top:0; z-index:900;
   }
   .header-logo {
-    font-size: 13px; font-weight: 700; color: var(--sky-dark);
-    white-space: nowrap;
-    padding-right: 10px; border-right: 1px solid var(--sky-border);
+    font-size:13px; font-weight:700; color:var(--sky-dark); white-space:nowrap;
+    padding-right:10px; border-right:1px solid var(--sky-border);
   }
   .header input[type="text"] {
-    flex: 1; min-width: 180px; max-width: 340px; height: 32px;
-    padding: 0 12px;
-    border: 1.5px solid var(--sky-border); border-radius: var(--r);
-    font-family: inherit; font-size: 13px; color: var(--text);
-    background: var(--sky-pale); outline: none;
-    transition: border-color .18s, background .18s, box-shadow .18s;
+    flex:1; min-width:180px; max-width:340px; height:32px; padding:0 12px;
+    border:1.5px solid var(--sky-border); border-radius:var(--r);
+    font-family:inherit; font-size:13px; color:var(--text);
+    background:var(--sky-pale); outline:none;
+    transition:border-color .18s,background .18s,box-shadow .18s;
   }
-  .header input[type="text"]::placeholder { color: var(--light); }
-  .header input[type="text"]:focus {
-    border-color: var(--sky); background: var(--white);
-    box-shadow: 0 0 0 3px rgba(74,159,212,.14);
+  .header input::placeholder { color:var(--light); }
+  .header input:focus {
+    border-color:var(--sky); background:var(--white);
+    box-shadow:0 0 0 3px rgba(74,159,212,.14);
   }
   .header button {
-    height: 32px; padding: 0 14px; border: none; border-radius: var(--r);
-    font-family: inherit; font-size: 12.5px; font-weight: 600;
-    cursor: pointer; white-space: nowrap;
-    transition: background .15s, transform .1s, box-shadow .1s;
+    height:32px; padding:0 14px; border:none; border-radius:var(--r);
+    font-family:inherit; font-size:12.5px; font-weight:600;
+    cursor:pointer; white-space:nowrap;
+    transition:background .15s,transform .1s,box-shadow .1s;
   }
-  .search-or-btn  { background: var(--sky); color: #fff; box-shadow: 0 3px var(--sky-dark); }
-  .search-or-btn:hover  { background: var(--sky-dark); }
-  .search-or-btn:active { box-shadow: none; transform: translateY(3px); }
-  .search-and-btn {
-    background: var(--sky-soft); color: var(--sky-deep);
-    border: 1.5px solid var(--sky-border); box-shadow: 0 3px var(--sky-border);
+  .btn-or  { background:var(--sky); color:#fff; box-shadow:0 3px var(--sky-dark); }
+  .btn-or:hover  { background:var(--sky-dark); }
+  .btn-or:active { box-shadow:none; transform:translateY(3px); }
+  .btn-and {
+    background:var(--sky-soft); color:var(--sky-deep);
+    border:1.5px solid var(--sky-border); box-shadow:0 3px var(--sky-border);
   }
-  .search-and-btn:hover  { background: var(--sky-border); }
-  .search-and-btn:active { box-shadow: none; transform: translateY(3px); }
-  .clear-btn {
-    background: #f0f2f5; color: var(--muted);
-    border: 1.5px solid var(--border); box-shadow: 0 3px #d4d8de;
+  .btn-and:hover  { background:var(--sky-border); }
+  .btn-and:active { box-shadow:none; transform:translateY(3px); }
+  .btn-clear {
+    background:#f0f2f5; color:var(--muted);
+    border:1.5px solid var(--border); box-shadow:0 3px #d4d8de;
   }
-  .clear-btn:hover  { background: #e4e8ed; }
-  .clear-btn:active { box-shadow: none; transform: translateY(3px); }
+  .btn-clear:hover  { background:#e4e8ed; }
+  .btn-clear:active { box-shadow:none; transform:translateY(3px); }
 
-  /* ── 메인 레이아웃 ── */
-  .main-container {
-    display: flex;
-    height: calc(100vh - 52px);
-    overflow: hidden;
-  }
+  /* 레이아웃 */
+  .main-container { display:flex; height:calc(100vh - 52px); overflow:hidden; }
 
-  /* ── 왼쪽 패널 ── */
+  /* 왼쪽 패널 */
   .left-panel {
-    width: 240px; flex-shrink: 0;
-    background: var(--white);
-    border-right: 1px solid var(--border);
-    overflow-y: auto; overflow-x: hidden;
-    padding: 12px 10px; position: relative;
+    width:240px; flex-shrink:0; background:var(--white);
+    border-right:1px solid var(--border);
+    overflow-y:auto; overflow-x:hidden; padding:12px 10px; position:relative;
   }
-  .sort-controls {
-    display: none; gap: 5px; margin-bottom: 10px;
+  .sort-bar { display:none; gap:5px; margin-bottom:10px; }
+  .sort-bar button {
+    flex:1; padding:5px 0; border:1.5px solid var(--sky-border);
+    background:var(--white); border-radius:var(--r);
+    font-family:inherit; font-size:12px; font-weight:600; color:var(--muted);
+    cursor:pointer; text-align:center; box-shadow:0 2px var(--sky-border);
+    transition:all .15s;
   }
-  .sort-controls button {
-    flex: 1; padding: 5px 0;
-    border: 1.5px solid var(--sky-border); background: var(--white);
-    border-radius: var(--r);
-    font-family: inherit; font-size: 12px; font-weight: 600; color: var(--muted);
-    cursor: pointer; text-align: center;
-    box-shadow: 0 2px var(--sky-border);
-    transition: all .15s;
+  .sort-bar button:active { box-shadow:none; transform:translateY(2px); }
+  .sort-bar button.active {
+    background:var(--sky); color:#fff;
+    border-color:var(--sky-dark); box-shadow:0 2px var(--sky-dark);
   }
-  .sort-controls button:active { box-shadow: none; transform: translateY(2px); }
-  .sort-controls button.active {
-    background: var(--sky); color: #fff;
-    border-color: var(--sky-dark); box-shadow: 0 2px var(--sky-dark);
+  ul.std-list { list-style:none; }
+  ul.std-list li {
+    padding:6px 8px; margin-bottom:2px; border-radius:var(--r);
+    cursor:pointer; font-size:13px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:background .12s,color .12s;
   }
-  ul.standard-list { list-style: none; }
-  ul.standard-list li {
-    padding: 6px 8px; margin-bottom: 2px; border-radius: var(--r);
-    cursor: pointer; font-size: 13px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: background .12s, color .12s;
-  }
-  ul.standard-list li:hover { background: var(--sky-pale); }
-  ul.standard-list li.active {
-    background: var(--sky-soft); color: var(--sky-dark); font-weight: 700;
-  }
-  ul.standard-list li.no-data { color: var(--light); cursor: default; }
-  ul.standard-list li.no-data:hover { background: none; }
+  ul.std-list li:hover  { background:var(--sky-pale); }
+  ul.std-list li.active { background:var(--sky-soft); color:var(--sky-dark); font-weight:700; }
+  /* 데이터 없는 항목 — 회색, 클릭 불가 */
+  ul.std-list li.dim { color:var(--light); cursor:default; }
+  ul.std-list li.dim:hover { background:none; }
 
-  /* ── 오른쪽 패널 ── */
+  /* 오른쪽 패널 */
   .right-panel {
-    flex: 1; background: var(--white);
-    overflow-y: auto; padding: 18px 24px;
-    position: relative; scroll-behavior: smooth;
+    flex:1; background:var(--white);
+    overflow-y:auto; padding:18px 24px;
+    position:relative; scroll-behavior:smooth;
   }
 
-  /* ── TOC 초기 화면 ── */
-  .toc-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-  }
-  .toc-header-bar { width: 3px; height: 16px; background: var(--sky); border-radius: 2px; }
-  .toc-header-text { font-size: 13px; font-weight: 700; color: var(--sky-dark); }
+  /* TOC */
+  .toc-hd { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .toc-bar { width:3px; height:16px; background:var(--sky); border-radius:2px; }
+  .toc-ttl { font-size:13px; font-weight:700; color:var(--sky-dark); }
   .toc-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 3px 10px; margin-bottom: 14px;
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:3px 10px; margin-bottom:14px;
   }
   .toc-item {
-    display: flex; align-items: baseline; gap: 5px;
-    padding: 5px 8px; border-radius: var(--r);
-    cursor: pointer; font-size: 13px; line-height: 1.45;
-    transition: background .12s, color .12s;
+    display:flex; align-items:baseline; gap:5px;
+    padding:5px 8px; border-radius:var(--r);
+    cursor:pointer; font-size:13px; line-height:1.45;
+    transition:background .12s;
   }
-  .toc-item:hover { background: var(--sky-pale); }
-  .toc-item.active { background: var(--sky-soft); color: var(--sky-dark); font-weight: 600; }
-  .toc-item.no-data { color: var(--light); cursor: default; }
-  .toc-item.no-data:hover { background: none; }
-  .toc-num {
-    font-size: 11px; font-weight: 700; color: var(--sky);
-    min-width: 30px; flex-shrink: 0; white-space: nowrap;
-  }
+  .toc-item:hover  { background:var(--sky-pale); }
+  .toc-item.active { background:var(--sky-soft); color:var(--sky-dark); font-weight:600; }
+  .toc-item.dim    { color:var(--light); cursor:default; }
+  .toc-item.dim:hover { background:none; }
+  .toc-num { font-size:11px; font-weight:700; color:var(--sky); min-width:30px; flex-shrink:0; }
 
-  /* ── 콘텐츠 영역 ── */
-  .message { font-size: 13px; color: var(--muted); padding: 4px 0 12px; }
-  .standard-title {
-    font-size: 15px; font-weight: 700; color: var(--sky-dark);
-    padding-bottom: 10px; margin-bottom: 16px;
-    border-bottom: 2px solid var(--sky-soft);
+  /* 콘텐츠 */
+  .message { font-size:13px; color:var(--muted); padding:4px 0 12px; }
+  .std-title {
+    font-size:15px; font-weight:700; color:var(--sky-dark);
+    padding-bottom:10px; margin-bottom:16px;
+    border-bottom:2px solid var(--sky-soft);
   }
-  .paragraph-block { margin-bottom: 1.6em; line-height: 1.8; font-size: 14px; }
-  .paragraph-id { font-size: 13.5px; font-weight: 700; color: var(--sky-dark); margin-right: 4px; }
-  .special-header { font-size: 13.5px; font-weight: 700; color: var(--text); display: inline-block; margin-right: 4px; }
-  .highlight { background: var(--hl); border-radius: 2px; padding: 0 1px; }
+  .para-block { margin-bottom:1.6em; line-height:1.8; font-size:14px; }
+  .para-id { font-size:13.5px; font-weight:700; color:var(--sky-dark); margin-right:4px; }
+  .special-header { font-size:13.5px; font-weight:700; color:var(--text); display:inline-block; margin-right:4px; }
+  .highlight { background:var(--hl); border-radius:2px; padding:0 1px; }
 
-  /* ── TOP 버튼 ── */
+  /* TOP 버튼 */
   .btn-top {
-    position: sticky; bottom: 20px; float: right;
-    width: 42px; height: 42px; border: none; border-radius: 50%;
-    background: rgba(74,159,212,.8); color: #fff;
-    font-size: 11px; font-weight: 700; font-family: inherit;
-    cursor: pointer; display: none; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
-    margin-top: -42px; margin-right: 4px; z-index: 100;
-    transition: background .15s;
+    position:sticky; bottom:20px; float:right;
+    width:42px; height:42px; border:none; border-radius:50%;
+    background:rgba(74,159,212,.8); color:#fff;
+    font-size:11px; font-weight:700; font-family:inherit;
+    cursor:pointer; display:none; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+    margin-top:-42px; margin-right:4px; z-index:100; transition:background .15s;
   }
-  .btn-top:hover { background: var(--sky); }
-  .btn-top:active { transform: translateY(2px); }
+  .btn-top:hover  { background:var(--sky); }
+  .btn-top:active { transform:translateY(2px); }
   .left-panel .btn-top {
-    width: 34px; height: 34px; font-size: 10px;
-    bottom: 12px; margin-top: -34px; margin-right: 0;
+    width:34px; height:34px; font-size:10px;
+    bottom:12px; margin-top:-34px; margin-right:0;
   }
 
-  /* ── Copy 프롬프트 ── */
+  /* Copy 프롬프트 */
   #copyPrompt {
-    position: absolute;
-    background: var(--sky-dark); color: #fff;
-    padding: 7px 12px; border-radius: 6px;
-    font-size: 13px; font-family: inherit;
-    z-index: 2000; display: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,.2);
-    pointer-events: auto; white-space: nowrap;
+    position:absolute; background:var(--sky-dark); color:#fff;
+    padding:7px 12px; border-radius:6px; font-size:13px; font-family:inherit;
+    z-index:2000; display:none;
+    box-shadow:0 2px 10px rgba(0,0,0,.2); pointer-events:auto; white-space:nowrap;
   }
   #copyPrompt button {
-    background: none; border: 1px solid rgba(255,255,255,.6); color: #fff;
-    padding: 2px 8px; margin-left: 6px; border-radius: 4px;
-    cursor: pointer; font-family: inherit; font-size: 12px;
-    transition: background .15s;
+    background:none; border:1px solid rgba(255,255,255,.6); color:#fff;
+    padding:2px 8px; margin-left:6px; border-radius:4px;
+    cursor:pointer; font-family:inherit; font-size:12px; transition:background .15s;
   }
-  #copyPrompt button:hover { background: rgba(255,255,255,.2); }
+  #copyPrompt button:hover { background:rgba(255,255,255,.2); }
 </style>
 </head>
 <body>
 
-<!-- 헤더 -->
 <div class="header">
   <span class="header-logo">📘 일반기업회계기준</span>
   <input type="text" id="searchInput" placeholder="검색어를 입력하세요">
-  <button class="search-or-btn"  id="btnOR">검색(OR)</button>
-  <button class="search-and-btn" id="btnAND">검색(AND)</button>
-  <button class="clear-btn"      id="btnClear">Clear</button>
+  <button class="btn-or"    id="btnOR">검색(OR)</button>
+  <button class="btn-and"   id="btnAND">검색(AND)</button>
+  <button class="btn-clear" id="btnClear">Clear</button>
 </div>
 
 <div class="main-container">
-  <!-- 왼쪽 패널 -->
   <div class="left-panel" id="leftPanel">
-    <div class="sort-controls" id="leftSortControls">
-      <button id="btnSortLeftOrder" class="active">기준서순</button>
-      <button id="btnSortLeftScore">정확도순</button>
+    <div class="sort-bar" id="leftSortBar">
+      <button id="btnSortLO" class="active">기준서순</button>
+      <button id="btnSortLS">정확도순</button>
     </div>
-    <ul class="standard-list" id="standardList"></ul>
+    <ul class="std-list" id="stdList"></ul>
     <button class="btn-top" id="leftTopBtn">TOP</button>
   </div>
 
-  <!-- 오른쪽 패널 -->
   <div class="right-panel" id="rightPanel">
-    <div class="sort-controls" id="rightSortControls">
-      <button id="btnSortRightOrder" class="active">문단순서</button>
-      <button id="btnSortRightScore">정확도순</button>
+    <div class="sort-bar" id="rightSortBar">
+      <button id="btnSortRO" class="active">문단순서</button>
+      <button id="btnSortRS">정확도순</button>
     </div>
     <div id="contentArea"></div>
     <button class="btn-top" id="rightTopBtn">TOP</button>
   </div>
 </div>
 
-<!-- Copy 프롬프트 -->
 <div id="copyPrompt">
   선택부분을 Copy할까요?
-  <button id="btnCopyYes">예(1)</button>
-  <button id="btnCopyNo">아니오(2)</button>
+  <button id="btnCpY">예(1)</button>
+  <button id="btnCpN">아니오(2)</button>
 </div>
 
 <script>
@@ -304,368 +268,299 @@ const TOC = [
   { num:"",     name:"일반기업회계기준 재무제표 영문양식" },
 ];
 
-/* ── 상태 변수 ── */
-let currentSearchTerms = [], currentSearchType = null;
-let currentActiveStandardTitle = null;
-let filteredStandards = [];
-let leftSortMode = 'order', rightSortMode = 'order';
-let copyTimeout, selectedTextToCopy = "";
+/* ── 상태 ── */
+let searchTerms = [], searchType = null;
+let activeTitle = null;
+let filtered = [];
+let lMode = 'order', rMode = 'order';
+let copyTO, copyText = "";
 
 /* ── 유틸 ── */
-function hasData()    { return standardsData && standardsData.length > 0; }
-function escRE(s)     { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-function tocTitle(it) { return it.num ? it.num + ' ' + it.name : it.name; }
+function escRE(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function tocFull(item) { return item.num ? item.num + ' ' + item.name : item.name; }
+
+/*
+ * standardsData에서 title로 항목 찾기
+ * 1순위: 완전 일치
+ * 2순위: name 부분만 포함 여부 (예: "수익"으로 "16장 수익" 매칭)
+ */
+function findStd(title) {
+  return standardsData.find(s => s.title === title)
+      || standardsData.find(s => s.title.includes(title) || title.includes(s.title));
+}
 
 /* ── 초기화 ── */
 window.addEventListener('load', () => {
   document.getElementById('btnOR').addEventListener('click',    () => doSearch('OR'));
   document.getElementById('btnAND').addEventListener('click',   () => doSearch('AND'));
-  document.getElementById('btnClear').addEventListener('click', resetState);
+  document.getElementById('btnClear').addEventListener('click', resetAll);
   document.getElementById('searchInput').addEventListener('keypress', e => {
     if (e.key === 'Enter') doSearch('OR');
   });
-
-  document.getElementById('btnSortLeftOrder').addEventListener('click',  () => sortLeft('order'));
-  document.getElementById('btnSortLeftScore').addEventListener('click',  () => sortLeft('score'));
-  document.getElementById('btnSortRightOrder').addEventListener('click', () => sortRight('order'));
-  document.getElementById('btnSortRightScore').addEventListener('click', () => sortRight('score'));
-
-  document.getElementById('leftTopBtn').addEventListener('click',  () => scrollToTop('leftPanel'));
-  document.getElementById('rightTopBtn').addEventListener('click', () => scrollToTop('rightPanel'));
-
-  document.getElementById('leftPanel').addEventListener('scroll', function () {
+  document.getElementById('btnSortLO').addEventListener('click', () => sortLeft('order'));
+  document.getElementById('btnSortLS').addEventListener('click', () => sortLeft('score'));
+  document.getElementById('btnSortRO').addEventListener('click', () => sortRight('order'));
+  document.getElementById('btnSortRS').addEventListener('click', () => sortRight('score'));
+  document.getElementById('leftTopBtn').addEventListener('click',  () => goTop('leftPanel'));
+  document.getElementById('rightTopBtn').addEventListener('click', () => goTop('rightPanel'));
+  document.getElementById('leftPanel').addEventListener('scroll', function() {
     document.getElementById('leftTopBtn').style.display = this.scrollTop > 100 ? 'flex' : 'none';
   });
-  document.getElementById('rightPanel').addEventListener('scroll', function () {
+  document.getElementById('rightPanel').addEventListener('scroll', function() {
     document.getElementById('rightTopBtn').style.display = this.scrollTop > 100 ? 'flex' : 'none';
   });
-
-  document.getElementById('btnCopyYes').addEventListener('click', () => confirmCopy(true));
-  document.getElementById('btnCopyNo').addEventListener('click',  () => confirmCopy(false));
-  document.addEventListener('mouseup', handleTextSelection);
-  document.addEventListener('keydown', handleCopyKeyPress);
-
-  resetState();
+  document.getElementById('btnCpY').addEventListener('click', () => doCopy(true));
+  document.getElementById('btnCpN').addEventListener('click', () => doCopy(false));
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('keydown', onKeyDown);
+  resetAll();
 });
 
-/* ── 상태 초기화 ── */
-function resetState() {
+/* ── 전체 초기화 ── */
+function resetAll() {
   document.getElementById('searchInput').value = '';
-  currentSearchTerms = []; currentSearchType = null;
-  currentActiveStandardTitle = null;
-  leftSortMode = 'order'; rightSortMode = 'order';
-
-  document.getElementById('leftSortControls').style.display  = 'none';
-  document.getElementById('rightSortControls').style.display = 'none';
-  document.getElementById('leftTopBtn').style.display  = 'none';
-  document.getElementById('rightTopBtn').style.display = 'none';
-
-  filteredStandards = standardsData.map(st => ({ ...st }));
-
-  renderLeftInitial();
-  renderTOC();
+  searchTerms = []; searchType = null; activeTitle = null;
+  lMode = 'order'; rMode = 'order';
+  hide('leftSortBar'); hide('rightSortBar');
+  hide('leftTopBtn');  hide('rightTopBtn');
+  renderLeftTOC();   /* 왼쪽: TOC 항상 표시 */
+  renderRightTOC();  /* 오른쪽: TOC 그리드 */
 }
 
-/* ── 왼쪽 패널: 전체 목록 (TOC 순서) ── */
-function renderLeftInitial() {
-  const list = document.getElementById('standardList');
-  list.innerHTML = '';
-  const dataSet = new Set(standardsData.map(s => s.title));
-
+/* ══════════════════════════════════════════════════════
+   왼쪽 패널 — TOC 기반으로 항상 전체 목록 표시
+   · standardsData에 데이터 있으면 → 파란색, 클릭 가능
+   · 데이터 없으면               → 회색, 클릭 불가
+══════════════════════════════════════════════════════ */
+function renderLeftTOC() {
+  const ul = document.getElementById('stdList');
+  ul.innerHTML = '';
   TOC.forEach(item => {
-    const title = tocTitle(item);
+    const title = tocFull(item);
+    const std   = findStd(title);          /* standardsData에서 찾기 */
     const li = document.createElement('li');
     li.textContent = title; li.title = title;
-    if (dataSet.has(title)) {
-      if (currentActiveStandardTitle === title) li.className = 'active';
-      li.addEventListener('click', () => openFullStandard(title));
+    if (std) {
+      /* 데이터 있음 → 클릭 가능 */
+      if (activeTitle === std.title) li.className = 'active';
+      li.addEventListener('click', () => openFull(std.title));
     } else {
-      li.className = 'no-data';
+      /* 데이터 없음 → 회색 표시 */
+      li.className = 'dim';
     }
-    list.appendChild(li);
+    ul.appendChild(li);
   });
 }
 
-/* ── 오른쪽: TOC 초기 화면 ── */
-function renderTOC() {
-  const dataSet = new Set(standardsData.map(s => s.title));
+/* ── 오른쪽 TOC 그리드 ── */
+function renderRightTOC() {
   const area = document.getElementById('contentArea');
   area.innerHTML = '';
 
   const hd = document.createElement('div');
-  hd.className = 'toc-header';
-  hd.innerHTML = '<div class="toc-header-bar"></div><div class="toc-header-text">일반기업회계기준 — 전체 목차</div>';
+  hd.className = 'toc-hd';
+  hd.innerHTML = '<div class="toc-bar"></div><div class="toc-ttl">일반기업회계기준 — 전체 목차</div>';
   area.appendChild(hd);
 
   const grid = document.createElement('div');
   grid.className = 'toc-grid';
-
   TOC.forEach(item => {
-    const title = tocTitle(item);
-    const found = dataSet.has(title);
+    const title = tocFull(item);
+    const std   = findStd(title);
     const el = document.createElement('div');
-    el.className = 'toc-item' + (found ? '' : ' no-data') +
-                   (currentActiveStandardTitle === title ? ' active' : '');
+    el.className = 'toc-item' + (std ? '' : ' dim') +
+                   (std && activeTitle === std.title ? ' active' : '');
     el.innerHTML = `<span class="toc-num">${item.num}</span><span>${item.name}</span>`;
-    if (found) el.addEventListener('click', () => openFullStandard(title));
+    if (std) el.addEventListener('click', () => openFull(std.title));
     grid.appendChild(el);
   });
-
   area.appendChild(grid);
 }
 
-/* ────────────────────────────────────────────────────
-   ★ 핵심 변경: 검색 없이 클릭 → 기준서 전문 표시
-   paragraphs 전체를 그대로 렌더링 (검색어 하이라이트 없음)
-──────────────────────────────────────────────────── */
-function openFullStandard(title) {
-  if (!hasData()) return;
-
-  currentActiveStandardTitle = title;
-  currentSearchTerms = [];        // 하이라이트 없음
-  currentSearchType  = null;      // 정렬 버튼 숨김
-
-  document.getElementById('leftSortControls').style.display  = 'none';
-  document.getElementById('rightSortControls').style.display = 'none';
-
-  // standardsData에서 직접 원본 paragraphs 전체를 가져옴
+/* ══════════════════════════════════════════════════════
+   검색 없이 클릭 → 기준서 전문 표시
+══════════════════════════════════════════════════════ */
+function openFull(title) {
   const std = standardsData.find(s => s.title === title);
   if (!std) return;
-
-  // 왼쪽 패널 active 표시 갱신
-  renderLeftInitial();
-
-  // 오른쪽: 전문 렌더링
-  renderParagraphs(std.title, std.paragraphs);
+  activeTitle  = title;
+  searchTerms  = []; searchType = null;
+  hide('leftSortBar'); hide('rightSortBar');
+  renderLeftTOC();
+  renderParagraphs(std.title, std.paragraphs, false);
   document.getElementById('rightPanel').scrollTop = 0;
 }
 
-/* ────────────────────────────────────────────────────
-   ★ 검색 후 클릭 → 검색어 포함 문단만 + 하이라이트
-──────────────────────────────────────────────────── */
-function selectSearchResult(title) {
-  currentActiveStandardTitle = title;
-
-  const std = filteredStandards.find(s => s.title === title);
-  if (!std) return;
-
-  // 검색 결과 정렬 버튼 표시
-  document.getElementById('rightSortControls').style.display = 'flex';
-  updateSortBtns('right', rightSortMode);
-
-  renderLeftPanel();  // active 표시
-
-  let paras = [...std.matchedParagraphs];
-  if (rightSortMode === 'score') paras.sort((a, b) => b.score - a.score);
-
-  renderParagraphs(std.title, paras, true); // true = 하이라이트 적용
-  document.getElementById('rightPanel').scrollTop = 0;
-}
-
-/* ── 공통 단락 렌더러 ── */
-function renderParagraphs(title, paragraphs, doHighlight = false) {
-  const area = document.getElementById('contentArea');
-  area.innerHTML = '';
-
-  const titleEl = document.createElement('div');
-  titleEl.className = 'standard-title';
-  titleEl.textContent = title;
-  area.appendChild(titleEl);
-
-  for (const p of paragraphs) {
-    const block = document.createElement('div');
-    block.className = 'paragraph-block';
-
-    const pid = document.createElement('span');
-    pid.className = 'paragraph-id';
-    pid.textContent = p.id;
-
-    const ptxt = document.createElement('span');
-    let t = p.text;
-
-    /* 전처리 */
-    t = t.replace(/ {4,}/g, '    ');
-    t = t.replace(/\([^)]+\)/g, m => m.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' '));
-    t = t.replace(/(?:\r?\n[ \t]*){4,}/g, '\n\n\n\n');
-    t = t.replace(/(^|[^\n])([ \t]*\r?\n[ \t]*){0,2}(?=[ \t]*[^(])(제\d+절.*)/gm,
-      (m, p1, p2, p3) => p1 ? p1 + '\n\n\n' + p3 : m);
-
-    /* 괄호 보호 후 특수 헤더 처리 */
-    const pMap = {}; let pc = 0;
-    t = t.replace(/\([^)]+\)/g, m => { const k = `__P${pc++}__`; pMap[k] = m; return k; });
-    t = t.replace(
-      /^[ \t]*(적용범위|용어의 정의|결론도출근거|주석공시|공시|일반사항|실무지침|부록[A-Z]?|제\d+절.*|사례\s*\d*|결\s*\d+\.\d+|실\s*\d+\.\d+|\d+[,.a-zA-Z]+\.\d+)/gm,
-      '<span class="special-header">$1</span>'
-    );
-    for (const k in pMap) t = t.replace(k, pMap[k]);
-
-    /* 검색어 하이라이트 (검색 결과 클릭 시에만) */
-    if (doHighlight && currentSearchTerms.length > 0) {
-      const rx = new RegExp(
-        `(${currentSearchTerms.map(escRE).join('|')})(?![^<]*>|[^<>]*</)`, 'gi'
-      );
-      t = t.replace(rx, '<span class="highlight">$1</span>');
-    }
-
-    t = t.replace(/ {4}/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
-    ptxt.innerHTML = ' ' + t.replace(/\n/g, '<br/>');
-
-    block.appendChild(pid);
-    block.appendChild(ptxt);
-    area.appendChild(block);
-  }
-}
-
-/* ── 검색 ── */
-function tokenize(t) { return t.trim().split(/\s+/).filter(x => x.length > 0); }
-
+/* ══════════════════════════════════════════════════════
+   검색
+══════════════════════════════════════════════════════ */
 function doSearch(type) {
-  const input = document.getElementById('searchInput').value.trim();
-  if (!input) { alert('검색어를 입력하세요.'); return; }
-  if (!hasData()) { alert('standardsData에 데이터를 먼저 입력해주세요.'); return; }
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { alert('검색어를 입력하세요.'); return; }
+  if (!standardsData.length) { alert('standardsData에 데이터를 먼저 입력해주세요.'); return; }
 
-  currentSearchTerms = tokenize(input);
-  currentSearchType  = type;
-  leftSortMode = 'order'; rightSortMode = 'order';
-  currentActiveStandardTitle = null;
+  searchTerms = q.split(/\s+/).filter(x => x);
+  searchType  = type;
+  lMode = 'order'; rMode = 'order'; activeTitle = null;
 
-  document.getElementById('leftSortControls').style.display = 'flex';
-  document.getElementById('rightSortControls').style.display = 'none';
-  updateSortBtns('left', leftSortMode);
+  show('leftSortBar'); hide('rightSortBar'); setSortA('L', lMode);
 
-  filteredStandards = [];
+  filtered = [];
   for (const st of standardsData) {
-    let totalScore = 0, matched = [];
+    let total = 0, matched = [];
     for (const p of st.paragraphs) {
-      let pScore = 0;
-      const combined = p.id + ' ' + p.text;
+      let ps = 0, txt = p.id + ' ' + p.text;
       if (type === 'AND') {
         let ok = true;
-        for (const term of currentSearchTerms) {
-          const c = (combined.match(new RegExp(escRE(term), 'gi')) || []).length;
-          if (!c) { ok = false; break; }
-          pScore += c;
+        for (const t of searchTerms) {
+          const c = (txt.match(new RegExp(escRE(t),'gi'))||[]).length;
+          if (!c) { ok=false; break; } ps+=c;
         }
-        if (ok) { matched.push({ ...p, score: pScore }); totalScore += pScore; }
+        if (ok) { matched.push({...p,score:ps}); total+=ps; }
       } else {
-        let any = false;
-        for (const term of currentSearchTerms) {
-          const c = (combined.match(new RegExp(escRE(term), 'gi')) || []).length;
-          if (c) { any = true; pScore += c; }
+        let any=false;
+        for (const t of searchTerms) {
+          const c=(txt.match(new RegExp(escRE(t),'gi'))||[]).length;
+          if(c){any=true;ps+=c;}
         }
-        if (any) { matched.push({ ...p, score: pScore }); totalScore += pScore; }
+        if(any){matched.push({...p,score:ps});total+=ps;}
       }
     }
-    if (matched.length) filteredStandards.push({ ...st, score: totalScore, matchedParagraphs: matched });
+    if (matched.length) filtered.push({...st,score:total,matchedParagraphs:matched});
   }
 
-  sortFilteredStandards();
-  renderLeftPanel();
+  sortFiltered();
+  renderLeftSearch();
+  document.getElementById('contentArea').innerHTML =
+    `<div class="message">검색 결과: <strong>${filtered.length}개</strong> 기준서 — 왼쪽에서 선택하세요.</div>`;
+}
 
-  const area = document.getElementById('contentArea');
-  area.innerHTML = `<div class="message">검색 결과: <strong>${filteredStandards.length}개</strong> 기준서 — 왼쪽에서 선택하세요.</div>`;
+/* 검색 결과 왼쪽 목록 */
+function renderLeftSearch() {
+  const ul = document.getElementById('stdList');
+  ul.innerHTML = '';
+  filtered.forEach(st => {
+    const li = document.createElement('li');
+    li.textContent = st.title; li.title = st.title;
+    if (activeTitle === st.title) li.className = 'active';
+    li.addEventListener('click', () => openSearchResult(st.title));
+    ul.appendChild(li);
+  });
+}
+
+/* 검색 후 클릭 → 매칭 문단 + 하이라이트 */
+function openSearchResult(title) {
+  const std = filtered.find(s => s.title === title);
+  if (!std) return;
+  activeTitle = title;
+  show('rightSortBar'); setSortA('R', rMode);
+  renderLeftSearch();
+  let paras = [...std.matchedParagraphs];
+  if (rMode === 'score') paras.sort((a,b) => b.score-a.score);
+  renderParagraphs(std.title, paras, true);
+  document.getElementById('rightPanel').scrollTop = 0;
 }
 
 /* ── 정렬 ── */
-function sortFilteredStandards() {
-  filteredStandards.sort((a, b) =>
-    leftSortMode === 'score'
-      ? (b.score !== a.score ? b.score - a.score : a.order - b.order)
-      : a.order - b.order
-  );
+function sortFiltered() {
+  filtered.sort((a,b) =>
+    lMode==='score' ? (b.score!==a.score?b.score-a.score:(a.order??0)-(b.order??0))
+                    : (a.order??0)-(b.order??0));
 }
-function sortLeft(mode) {
-  leftSortMode = mode;
-  updateSortBtns('left', mode);
-  sortFilteredStandards();
-  renderLeftPanel();
+function sortLeft(mode)  {
+  lMode=mode; setSortA('L',mode); sortFiltered(); renderLeftSearch();
 }
 function sortRight(mode) {
-  rightSortMode = mode;
-  updateSortBtns('right', mode);
-  const s = filteredStandards.find(s => s.title === currentActiveStandardTitle);
-  if (s) {
-    let paras = [...s.matchedParagraphs];
-    if (mode === 'score') paras.sort((a, b) => b.score - a.score);
-    renderParagraphs(s.title, paras, true);
+  rMode=mode; setSortA('R',mode);
+  const s=filtered.find(s=>s.title===activeTitle); if(!s)return;
+  let p=[...s.matchedParagraphs];
+  if(mode==='score') p.sort((a,b)=>b.score-a.score);
+  renderParagraphs(s.title,p,true);
+}
+
+/* ══════════════════════════════════════════════════════
+   공통 단락 렌더러
+══════════════════════════════════════════════════════ */
+function renderParagraphs(title, paragraphs, doHL) {
+  const area = document.getElementById('contentArea');
+  area.innerHTML = '';
+  const ttl = document.createElement('div');
+  ttl.className='std-title'; ttl.textContent=title;
+  area.appendChild(ttl);
+
+  for (const p of paragraphs) {
+    const blk=document.createElement('div'); blk.className='para-block';
+    const pid=document.createElement('span'); pid.className='para-id'; pid.textContent=p.id;
+    const ptx=document.createElement('span');
+    let t=p.text;
+    t=t.replace(/ {4,}/g,'    ');
+    t=t.replace(/\([^)]+\)/g, m=>m.replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' '));
+    t=t.replace(/(?:\r?\n[ \t]*){4,}/g,'\n\n\n\n');
+    t=t.replace(/(^|[^\n])([ \t]*\r?\n[ \t]*){0,2}(?=[ \t]*[^(])(제\d+절.*)/gm,
+      (m,p1,p2,p3)=>p1?p1+'\n\n\n'+p3:m);
+    const pm={}; let pc=0;
+    t=t.replace(/\([^)]+\)/g,m=>{const k=`__P${pc++}__`;pm[k]=m;return k;});
+    t=t.replace(/^[ \t]*(적용범위|용어의 정의|결론도출근거|주석공시|공시|일반사항|실무지침|부록[A-Z]?|제\d+절.*|사례\s*\d*|결\s*\d+\.\d+|실\s*\d+\.\d+|\d+[,.a-zA-Z]+\.\d+)/gm,
+      '<span class="special-header">$1</span>');
+    for(const k in pm) t=t.replace(k,pm[k]);
+    if(doHL && searchTerms.length){
+      const rx=new RegExp(`(${searchTerms.map(escRE).join('|')})(?![^<]*>|[^<>]*</)`, 'gi');
+      t=t.replace(rx,'<span class="highlight">$1</span>');
+    }
+    t=t.replace(/ {4}/g,'&nbsp;&nbsp;&nbsp;&nbsp;');
+    ptx.innerHTML=' '+t.replace(/\n/g,'<br/>');
+    blk.appendChild(pid); blk.appendChild(ptx); area.appendChild(blk);
   }
 }
 
-/* ── 왼쪽 패널: 검색 결과 목록 ── */
-function renderLeftPanel() {
-  const list = document.getElementById('standardList');
-  list.innerHTML = '';
-  for (const st of filteredStandards) {
-    const li = document.createElement('li');
-    li.textContent = st.title; li.title = st.title;
-    if (currentActiveStandardTitle === st.title) li.className = 'active';
-    li.addEventListener('click', () => selectSearchResult(st.title));
-    list.appendChild(li);
-  }
-}
-
-/* ── 정렬 버튼 상태 ── */
-function updateSortBtns(side, mode) {
-  if (side === 'left') {
-    document.getElementById('btnSortLeftOrder').className  = mode === 'order' ? 'active' : '';
-    document.getElementById('btnSortLeftScore').className  = mode === 'score' ? 'active' : '';
+/* ── 헬퍼 ── */
+function setSortA(side,mode){
+  if(side==='L'){
+    document.getElementById('btnSortLO').className=mode==='order'?'active':'';
+    document.getElementById('btnSortLS').className=mode==='score'?'active':'';
   } else {
-    document.getElementById('btnSortRightOrder').className = mode === 'order' ? 'active' : '';
-    document.getElementById('btnSortRightScore').className = mode === 'score' ? 'active' : '';
+    document.getElementById('btnSortRO').className=mode==='order'?'active':'';
+    document.getElementById('btnSortRS').className=mode==='score'?'active':'';
   }
 }
-
-/* ── TOP ── */
-function scrollToTop(id) {
-  document.getElementById(id).scrollTo({ top: 0, behavior: 'smooth' });
-}
+function show(id){document.getElementById(id).style.display='flex';}
+function hide(id){document.getElementById(id).style.display='none';}
+function goTop(id){document.getElementById(id).scrollTo({top:0,behavior:'smooth'});}
 
 /* ── Copy 프롬프트 ── */
-function handleTextSelection(e) {
-  if (e.target.closest('#copyPrompt')) return;
-  const sel = window.getSelection();
-  selectedTextToCopy = sel ? sel.toString().trim() : '';
-  const el = document.getElementById('copyPrompt');
-  if (selectedTextToCopy) {
-    el.style.left = e.pageX + 'px';
-    el.style.top  = (e.pageY - 40) + 'px';
-    el.style.display = 'block';
-    if (copyTimeout) clearTimeout(copyTimeout);
-    copyTimeout = setTimeout(() => {
-      el.style.display = 'none';
-      selectedTextToCopy = '';
-      window.getSelection().removeAllRanges();
-    }, 3000);
-  } else {
-    el.style.display = 'none';
-  }
+function onMouseUp(e){
+  if(e.target.closest('#copyPrompt'))return;
+  const sel=window.getSelection();
+  copyText=sel?sel.toString().trim():'';
+  const el=document.getElementById('copyPrompt');
+  if(copyText){
+    el.style.left=e.pageX+'px'; el.style.top=(e.pageY-40)+'px';
+    el.style.display='block';
+    if(copyTO)clearTimeout(copyTO);
+    copyTO=setTimeout(()=>{el.style.display='none';copyText='';window.getSelection().removeAllRanges();},3000);
+  } else { el.style.display='none'; }
 }
-
-function confirmCopy(yes) {
-  const el = document.getElementById('copyPrompt');
-  if (copyTimeout) clearTimeout(copyTimeout);
-  if (yes && selectedTextToCopy) {
-    navigator.clipboard.writeText(selectedTextToCopy).then(() => {
-      el.textContent = '✅ 복사되었습니다!';
-      setTimeout(() => {
-        el.style.display = 'none';
-        el.innerHTML = '선택부분을 Copy할까요? <button id="btnCopyYes">예(1)</button><button id="btnCopyNo">아니오(2)</button>';
-        document.getElementById('btnCopyYes').addEventListener('click', () => confirmCopy(true));
-        document.getElementById('btnCopyNo').addEventListener('click',  () => confirmCopy(false));
-      }, 1000);
-    }).catch(() => { el.style.display = 'none'; });
-  } else {
-    el.style.display = 'none';
-    window.getSelection().removeAllRanges();
-  }
-  selectedTextToCopy = '';
+function doCopy(yes){
+  const el=document.getElementById('copyPrompt');
+  if(copyTO)clearTimeout(copyTO);
+  if(yes&&copyText){
+    navigator.clipboard.writeText(copyText).then(()=>{
+      el.textContent='✅ 복사되었습니다!';
+      setTimeout(()=>{
+        el.style.display='none';
+        el.innerHTML='선택부분을 Copy할까요? <button id="btnCpY">예(1)</button><button id="btnCpN">아니오(2)</button>';
+        document.getElementById('btnCpY').addEventListener('click',()=>doCopy(true));
+        document.getElementById('btnCpN').addEventListener('click',()=>doCopy(false));
+      },1000);
+    }).catch(()=>{el.style.display='none';});
+  } else { el.style.display='none'; window.getSelection().removeAllRanges(); }
+  copyText='';
 }
-
-function handleCopyKeyPress(e) {
-  const el = document.getElementById('copyPrompt');
-  if (el.style.display === 'block') {
-    if (e.key === '1') { e.preventDefault(); confirmCopy(true); }
-    if (e.key === '2') { e.preventDefault(); confirmCopy(false); }
+function onKeyDown(e){
+  const el=document.getElementById('copyPrompt');
+  if(el.style.display==='block'){
+    if(e.key==='1'){e.preventDefault();doCopy(true);}
+    if(e.key==='2'){e.preventDefault();doCopy(false);}
   }
 }
 </script>
