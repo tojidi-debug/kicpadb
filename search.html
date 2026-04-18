@@ -35,7 +35,6 @@
     line-height: 1.65;
   }
 
-  /* ── 스크롤바 ── */
   ::-webkit-scrollbar { width: 7px; height: 7px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--sky-border); border-radius: 4px; }
@@ -313,13 +312,12 @@ let leftSortMode = 'order', rightSortMode = 'order';
 let copyTimeout, selectedTextToCopy = "";
 
 /* ── 유틸 ── */
-function hasData() { return standardsData && standardsData.length > 0; }
-function escRE(s)  { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-function tocTitle(item) { return item.num ? item.num + ' ' + item.name : item.name; }
+function hasData()    { return standardsData && standardsData.length > 0; }
+function escRE(s)     { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function tocTitle(it) { return it.num ? it.num + ' ' + it.name : it.name; }
 
 /* ── 초기화 ── */
 window.addEventListener('load', () => {
-  /* 헤더 버튼 */
   document.getElementById('btnOR').addEventListener('click',    () => doSearch('OR'));
   document.getElementById('btnAND').addEventListener('click',   () => doSearch('AND'));
   document.getElementById('btnClear').addEventListener('click', resetState);
@@ -327,17 +325,14 @@ window.addEventListener('load', () => {
     if (e.key === 'Enter') doSearch('OR');
   });
 
-  /* 정렬 버튼 */
   document.getElementById('btnSortLeftOrder').addEventListener('click',  () => sortLeft('order'));
   document.getElementById('btnSortLeftScore').addEventListener('click',  () => sortLeft('score'));
   document.getElementById('btnSortRightOrder').addEventListener('click', () => sortRight('order'));
   document.getElementById('btnSortRightScore').addEventListener('click', () => sortRight('score'));
 
-  /* TOP 버튼 */
   document.getElementById('leftTopBtn').addEventListener('click',  () => scrollToTop('leftPanel'));
   document.getElementById('rightTopBtn').addEventListener('click', () => scrollToTop('rightPanel'));
 
-  /* 스크롤 → TOP 표시 */
   document.getElementById('leftPanel').addEventListener('scroll', function () {
     document.getElementById('leftTopBtn').style.display = this.scrollTop > 100 ? 'flex' : 'none';
   });
@@ -345,9 +340,8 @@ window.addEventListener('load', () => {
     document.getElementById('rightTopBtn').style.display = this.scrollTop > 100 ? 'flex' : 'none';
   });
 
-  /* Copy 프롬프트 */
-  document.getElementById('btnCopyYes').addEventListener('click',  () => confirmCopy(true));
-  document.getElementById('btnCopyNo').addEventListener('click',   () => confirmCopy(false));
+  document.getElementById('btnCopyYes').addEventListener('click', () => confirmCopy(true));
+  document.getElementById('btnCopyNo').addEventListener('click',  () => confirmCopy(false));
   document.addEventListener('mouseup', handleTextSelection);
   document.addEventListener('keydown', handleCopyKeyPress);
 
@@ -366,16 +360,13 @@ function resetState() {
   document.getElementById('leftTopBtn').style.display  = 'none';
   document.getElementById('rightTopBtn').style.display = 'none';
 
-  filteredStandards = standardsData.map(st => ({
-    ...st, score: 0,
-    matchedParagraphs: st.paragraphs.map(p => ({ ...p, score: 0 }))
-  }));
+  filteredStandards = standardsData.map(st => ({ ...st }));
 
   renderLeftInitial();
   renderTOC();
 }
 
-/* ── 왼쪽 패널: 초기 전체 목록 ── */
+/* ── 왼쪽 패널: 전체 목록 (TOC 순서) ── */
 function renderLeftInitial() {
   const list = document.getElementById('standardList');
   list.innerHTML = '';
@@ -384,11 +375,10 @@ function renderLeftInitial() {
   TOC.forEach(item => {
     const title = tocTitle(item);
     const li = document.createElement('li');
-    li.textContent = title;
-    li.title = title;
+    li.textContent = title; li.title = title;
     if (dataSet.has(title)) {
       if (currentActiveStandardTitle === title) li.className = 'active';
-      li.addEventListener('click', () => selectStandardDirect(title));
+      li.addEventListener('click', () => openFullStandard(title));
     } else {
       li.className = 'no-data';
     }
@@ -400,11 +390,11 @@ function renderLeftInitial() {
 function renderTOC() {
   const dataSet = new Set(standardsData.map(s => s.title));
   const area = document.getElementById('contentArea');
+  area.innerHTML = '';
 
   const hd = document.createElement('div');
   hd.className = 'toc-header';
   hd.innerHTML = '<div class="toc-header-bar"></div><div class="toc-header-text">일반기업회계기준 — 전체 목차</div>';
-  area.innerHTML = '';
   area.appendChild(hd);
 
   const grid = document.createElement('div');
@@ -417,31 +407,113 @@ function renderTOC() {
     el.className = 'toc-item' + (found ? '' : ' no-data') +
                    (currentActiveStandardTitle === title ? ' active' : '');
     el.innerHTML = `<span class="toc-num">${item.num}</span><span>${item.name}</span>`;
-    if (found) el.addEventListener('click', () => selectStandardDirect(title));
+    if (found) el.addEventListener('click', () => openFullStandard(title));
     grid.appendChild(el);
   });
 
   area.appendChild(grid);
 }
 
-/* ── TOC / 왼쪽 패널에서 직접 선택 ── */
-function selectStandardDirect(title) {
+/* ────────────────────────────────────────────────────
+   ★ 핵심 변경: 검색 없이 클릭 → 기준서 전문 표시
+   paragraphs 전체를 그대로 렌더링 (검색어 하이라이트 없음)
+──────────────────────────────────────────────────── */
+function openFullStandard(title) {
   if (!hasData()) return;
-  filteredStandards = standardsData.map(st => ({
-    ...st, score: 0,
-    matchedParagraphs: st.paragraphs.map(p => ({ ...p, score: 0 }))
-  }));
+
   currentActiveStandardTitle = title;
-  currentSearchType = null;
-  currentSearchTerms = [];
+  currentSearchTerms = [];        // 하이라이트 없음
+  currentSearchType  = null;      // 정렬 버튼 숨김
+
   document.getElementById('leftSortControls').style.display  = 'none';
   document.getElementById('rightSortControls').style.display = 'none';
 
+  // standardsData에서 직접 원본 paragraphs 전체를 가져옴
+  const std = standardsData.find(s => s.title === title);
+  if (!std) return;
+
+  // 왼쪽 패널 active 표시 갱신
+  renderLeftInitial();
+
+  // 오른쪽: 전문 렌더링
+  renderParagraphs(std.title, std.paragraphs);
+  document.getElementById('rightPanel').scrollTop = 0;
+}
+
+/* ────────────────────────────────────────────────────
+   ★ 검색 후 클릭 → 검색어 포함 문단만 + 하이라이트
+──────────────────────────────────────────────────── */
+function selectSearchResult(title) {
+  currentActiveStandardTitle = title;
+
   const std = filteredStandards.find(s => s.title === title);
   if (!std) return;
-  renderLeftInitial();
-  renderRightPanel(std);
+
+  // 검색 결과 정렬 버튼 표시
+  document.getElementById('rightSortControls').style.display = 'flex';
+  updateSortBtns('right', rightSortMode);
+
+  renderLeftPanel();  // active 표시
+
+  let paras = [...std.matchedParagraphs];
+  if (rightSortMode === 'score') paras.sort((a, b) => b.score - a.score);
+
+  renderParagraphs(std.title, paras, true); // true = 하이라이트 적용
   document.getElementById('rightPanel').scrollTop = 0;
+}
+
+/* ── 공통 단락 렌더러 ── */
+function renderParagraphs(title, paragraphs, doHighlight = false) {
+  const area = document.getElementById('contentArea');
+  area.innerHTML = '';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'standard-title';
+  titleEl.textContent = title;
+  area.appendChild(titleEl);
+
+  for (const p of paragraphs) {
+    const block = document.createElement('div');
+    block.className = 'paragraph-block';
+
+    const pid = document.createElement('span');
+    pid.className = 'paragraph-id';
+    pid.textContent = p.id;
+
+    const ptxt = document.createElement('span');
+    let t = p.text;
+
+    /* 전처리 */
+    t = t.replace(/ {4,}/g, '    ');
+    t = t.replace(/\([^)]+\)/g, m => m.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' '));
+    t = t.replace(/(?:\r?\n[ \t]*){4,}/g, '\n\n\n\n');
+    t = t.replace(/(^|[^\n])([ \t]*\r?\n[ \t]*){0,2}(?=[ \t]*[^(])(제\d+절.*)/gm,
+      (m, p1, p2, p3) => p1 ? p1 + '\n\n\n' + p3 : m);
+
+    /* 괄호 보호 후 특수 헤더 처리 */
+    const pMap = {}; let pc = 0;
+    t = t.replace(/\([^)]+\)/g, m => { const k = `__P${pc++}__`; pMap[k] = m; return k; });
+    t = t.replace(
+      /^[ \t]*(적용범위|용어의 정의|결론도출근거|주석공시|공시|일반사항|실무지침|부록[A-Z]?|제\d+절.*|사례\s*\d*|결\s*\d+\.\d+|실\s*\d+\.\d+|\d+[,.a-zA-Z]+\.\d+)/gm,
+      '<span class="special-header">$1</span>'
+    );
+    for (const k in pMap) t = t.replace(k, pMap[k]);
+
+    /* 검색어 하이라이트 (검색 결과 클릭 시에만) */
+    if (doHighlight && currentSearchTerms.length > 0) {
+      const rx = new RegExp(
+        `(${currentSearchTerms.map(escRE).join('|')})(?![^<]*>|[^<>]*</)`, 'gi'
+      );
+      t = t.replace(rx, '<span class="highlight">$1</span>');
+    }
+
+    t = t.replace(/ {4}/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+    ptxt.innerHTML = ' ' + t.replace(/\n/g, '<br/>');
+
+    block.appendChild(pid);
+    block.appendChild(ptxt);
+    area.appendChild(block);
+  }
 }
 
 /* ── 검색 ── */
@@ -458,6 +530,7 @@ function doSearch(type) {
   currentActiveStandardTitle = null;
 
   document.getElementById('leftSortControls').style.display = 'flex';
+  document.getElementById('rightSortControls').style.display = 'none';
   updateSortBtns('left', leftSortMode);
 
   filteredStandards = [];
@@ -491,7 +564,6 @@ function doSearch(type) {
 
   const area = document.getElementById('contentArea');
   area.innerHTML = `<div class="message">검색 결과: <strong>${filteredStandards.length}개</strong> 기준서 — 왼쪽에서 선택하세요.</div>`;
-  document.getElementById('rightSortControls').style.display = 'none';
 }
 
 /* ── 정렬 ── */
@@ -512,7 +584,11 @@ function sortRight(mode) {
   rightSortMode = mode;
   updateSortBtns('right', mode);
   const s = filteredStandards.find(s => s.title === currentActiveStandardTitle);
-  if (s) renderRightPanel(s);
+  if (s) {
+    let paras = [...s.matchedParagraphs];
+    if (mode === 'score') paras.sort((a, b) => b.score - a.score);
+    renderParagraphs(s.title, paras, true);
+  }
 }
 
 /* ── 왼쪽 패널: 검색 결과 목록 ── */
@@ -521,84 +597,10 @@ function renderLeftPanel() {
   list.innerHTML = '';
   for (const st of filteredStandards) {
     const li = document.createElement('li');
-    li.textContent = st.title;
-    li.title = st.title;
+    li.textContent = st.title; li.title = st.title;
     if (currentActiveStandardTitle === st.title) li.className = 'active';
-    li.addEventListener('click', () => selectStandard(st.title));
+    li.addEventListener('click', () => selectSearchResult(st.title));
     list.appendChild(li);
-  }
-}
-
-/* ── 검색 결과에서 기준서 선택 ── */
-function selectStandard(title) {
-  currentActiveStandardTitle = title;
-  renderLeftPanel();
-  const std = filteredStandards.find(s => s.title === title);
-  if (!std) return;
-  if (currentSearchType) {
-    document.getElementById('rightSortControls').style.display = 'flex';
-    updateSortBtns('right', rightSortMode);
-  } else {
-    document.getElementById('rightSortControls').style.display = 'none';
-  }
-  renderRightPanel(std);
-  document.getElementById('rightPanel').scrollTop = 0;
-}
-
-/* ── 오른쪽 패널: 기준서 내용 렌더링 ── */
-function renderRightPanel(standard) {
-  const area = document.getElementById('contentArea');
-  area.innerHTML = '';
-
-  const titleEl = document.createElement('div');
-  titleEl.className = 'standard-title';
-  titleEl.textContent = standard.title;
-  area.appendChild(titleEl);
-
-  let paras = [...standard.matchedParagraphs];
-  if (currentSearchType && rightSortMode === 'score') paras.sort((a, b) => b.score - a.score);
-
-  for (const p of paras) {
-    const block = document.createElement('div');
-    block.className = 'paragraph-block';
-
-    const pid = document.createElement('span');
-    pid.className = 'paragraph-id';
-    pid.textContent = p.id;
-
-    const ptxt = document.createElement('span');
-    let t = p.text;
-
-    /* 전처리 */
-    t = t.replace(/ {4,}/g, '    ');
-    t = t.replace(/\([^)]+\)/g, m => m.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' '));
-    t = t.replace(/(?:\r?\n[ \t]*){4,}/g, '\n\n\n\n');
-    t = t.replace(/(^|[^\n])([ \t]*\r?\n[ \t]*){0,2}(?=[ \t]*[^(])(제\d+절.*)/gm,
-      (m, p1, p2, p3) => p1 ? p1 + '\n\n\n' + p3 : m);
-
-    /* 괄호 보호 후 특수 헤더 처리 */
-    const pMap = {};  let pc = 0;
-    t = t.replace(/\([^)]+\)/g, m => { const k = `__P${pc++}__`; pMap[k] = m; return k; });
-    t = t.replace(
-      /^[ \t]*(적용범위|용어의 정의|결론도출근거|주석공시|공시|일반사항|실무지침|부록[A-Z]?|제\d+절.*|사례\s*\d*|결\s*\d+\.\d+|실\s*\d+\.\d+|\d+[,.a-zA-Z]+\.\d+)/gm,
-      '<span class="special-header">$1</span>'
-    );
-    for (const k in pMap) t = t.replace(k, pMap[k]);
-
-    /* 검색어 하이라이트 */
-    if (currentSearchTerms.length > 0) {
-      const rx = new RegExp(
-        `(${currentSearchTerms.map(escRE).join('|')})(?![^<]*>|[^<>]*</)`, 'gi'
-      );
-      t = t.replace(rx, '<span class="highlight">$1</span>');
-    }
-
-    t = t.replace(/ {4}/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
-    ptxt.innerHTML = ' ' + t.replace(/\n/g, '<br/>');
-
-    block.appendChild(pid);
-    block.appendChild(ptxt);
-    area.appendChild(block);
   }
 }
 
